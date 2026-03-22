@@ -2032,7 +2032,17 @@ function getSayuSketch(bookIdx, chIdx) {
   var sketchKey = bookIdx + '_' + chIdx;
   if (sketches[sketchKey]) return sketches[sketchKey];
   if (extraSketches[sketchKey]) return extraSketches[sketchKey];
-  return '';
+
+  // AI로 추가된 책 기본 스케치 (책마다 다른 패턴)
+  var w = '<defs><filter id="wob"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2" xChannelSelector="R" yChannelSelector="G"/></filter></defs>';
+  var defaultPatterns = [
+    '<svg width="220" height="110" viewBox="0 0 220 110" fill="none">' + w + '<g filter="url(#wob)"><circle cx="110" cy="50" r="35" stroke="#2A0510" stroke-width="1.8" fill="none" opacity="0.4"/><path d="M80 50 L95 35 L110 50 L125 35 L140 50" stroke="#2A0510" stroke-width="1.5" fill="none" opacity="0.5"/><circle cx="110" cy="50" r="8" stroke="#2A0510" stroke-width="1.8" fill="none"/><path d="M120 42 L140 30" stroke="#2A0510" stroke-width="1.3" stroke-linecap="round"/><polygon points="140,30 134,28 135,34" fill="#2A0510"/><text x="142" y="29" font-family="serif" font-size="8" fill="#2A0510">핵심</text><text x="65" y="95" font-family="serif" font-size="8" fill="#2A0510" opacity="0.5">읽고 생각하고 느껴요</text></g></svg>',
+    '<svg width="220" height="110" viewBox="0 0 220 110" fill="none">' + w + '<g filter="url(#wob)"><rect x="30" y="20" width="60" height="75" rx="4" stroke="#2A0510" stroke-width="2" fill="none"/><path d="M38 38 L82 38 M38 50 L82 50 M38 62 L70 62 M38 74 L82 74" stroke="#2A0510" stroke-width="1" opacity="0.5"/><circle cx="160" cy="55" r="28" stroke="#2A0510" stroke-width="1.5" fill="none" opacity="0.3" stroke-dasharray="5 3"/><path d="M100 45 L128 48" stroke="#2A0510" stroke-width="1.3" stroke-linecap="round"/><polygon points="128,48 122,45 122,51" fill="#2A0510"/><text x="135" y="35" font-family="serif" font-size="8" fill="#2A0510" opacity="0.6">사유의 공간</text><text x="45" y="105" font-family="serif" font-size="8" fill="#2A0510" opacity="0.5">초록독서 · 밑줄독서</text></g></svg>',
+    '<svg width="220" height="110" viewBox="0 0 220 110" fill="none">' + w + '<g filter="url(#wob)"><path d="M40 85 Q70 20 110 15 Q150 20 180 85" stroke="#2A0510" stroke-width="2" fill="none" opacity="0.4"/><path d="M40 85 L180 85" stroke="#2A0510" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/><circle cx="110" cy="15" r="6" stroke="#2A0510" stroke-width="1.8" fill="none"/><path d="M155 40 L172 30" stroke="#2A0510" stroke-width="1.3" stroke-linecap="round"/><polygon points="172,30 166,28 167,34" fill="#2A0510"/><text x="174" y="29" font-family="serif" font-size="8" fill="#2A0510">질문</text><text x="55" y="100" font-family="serif" font-size="8" fill="#2A0510" opacity="0.5">생각이 자라는 책</text></g></svg>',
+    '<svg width="220" height="110" viewBox="0 0 220 110" fill="none">' + w + '<g filter="url(#wob)"><circle cx="60" cy="55" r="25" stroke="#2A0510" stroke-width="2" fill="none" opacity="0.5"/><circle cx="160" cy="55" r="25" stroke="#2A0510" stroke-width="2" fill="none" opacity="0.5"/><path d="M85 55 L135 55" stroke="#2A0510" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="4 3"/><text x="50" y="59" font-family="serif" font-size="10" fill="#2A0510" opacity="0.7">이전</text><text x="148" y="59" font-family="serif" font-size="10" fill="#2A0510" opacity="0.7">이후</text><text x="55" y="95" font-family="serif" font-size="8" fill="#2A0510" opacity="0.5">책이 나를 바꾼다</text></g></svg>',
+  ];
+  var idx = (bookIdx * 7 + chIdx) % defaultPatterns.length;
+  return '<div class="sayu-sketch">' + defaultPatterns[idx] + '</div>';
 }
 function saveSayuMemo(idx, key) {
   var el = document.getElementById('sayu_inp_' + idx);
@@ -3947,6 +3957,7 @@ async function generateBookWithAI() {
 
     var newId = BOOKS.length;
     book.id = newId;
+    book.emo = book.emoji || '📚';  // emoji → emo 변환
     book.chapters = book.chapters.map(function(ch, i) {
       ch.fe = ch.fe || '📖';
       ch.sm = ch.sm || [];
