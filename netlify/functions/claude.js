@@ -1,61 +1,43 @@
-const https = require('https');
-
 exports.handler = async function(event) {
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS'
-      },
-      body: ''
-    };
-  }
+    if (event.httpMethod === 'OPTIONS') {
+          return {
+                  statusCode: 200,
+                  headers: {
+                            'Access-Control-Allow-Origin': '*',
+                            'Access-Control-Allow-Headers': 'Content-Type',
+                            'Access-Control-Allow-Methods': 'POST, OPTIONS'
+                  },
+                  body: ''
+          };
+    }
 
-  try {
-    const { prompt } = JSON.parse(event.body);
-    
-    const result = await new Promise((resolve, reject) => {
-      const data = JSON.stringify({
-        model: 'claude-opus-4-6',
-        max_tokens: 4000,
-        messages: [{ role: 'user', content: prompt }]
-      });
+    try {
+          const { prompt } = JSON.parse(event.body);
+          const response = await fetch('https://api.anthropic.com/v1/messages', {
+                  method: 'POST',
+                  headers: {
+                            'Content-Type': 'application/json',
+                            'x-api-key': process.env.ANTHROPIC_API_KEY,
+                            'anthropic-version': '2023-06-01'
+                  },
+                  body: JSON.stringify({
+                            model: 'claude-haiku-4-5-20251001',
+                            max_tokens: 4000,
+                            messages: [{ role: 'user', content: prompt }]
+                  })
+          });
 
-      const options = {
-        hostname: 'api.anthropic.com',
-        path: '/v1/messages',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-          'Content-Length': Buffer.byteLength(data)
-        }
-      };
-
-      const req = https.request(options, (res) => {
-        let body = '';
-        res.on('data', chunk => body += chunk);
-        res.on('end', () => resolve(JSON.parse(body)));
-      });
-
-      req.on('error', reject);
-      req.write(data);
-      req.end();
-    });
-
-    return {
-      statusCode: 200,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify(result)
-    };
-  } catch(e) {
-    return {
-      statusCode: 500,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ error: e.message })
-    };
-  }
+      const data = await response.json();
+          return {
+                  statusCode: 200,
+                  headers: { 'Access-Control-Allow-Origin': '*' },
+                  body: JSON.stringify(data)
+          };
+    } catch(e) {
+          return {
+                  statusCode: 500,
+                  headers: { 'Access-Control-Allow-Origin': '*' },
+                  body: JSON.stringify({ error: e.message })
+          };
+    }
 };
