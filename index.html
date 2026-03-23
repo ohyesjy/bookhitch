@@ -1409,9 +1409,8 @@ body { display:flex; justify-content:center; }
     <div class="add-title">ADD BOOK</div>
     <div class="add-sub">책 제목을 입력하면 AI가 핵심내용을 만들어줘요</div>
   </div>
-  <div class="srch-res" id="srchRes"></div>
 
-  <!-- AI 책 생성 섹션 -->
+  <!-- AI 책 생성 섹션 (상단) -->
   <div style="padding: 0 20px 20px;">
     <input type="text" id="aiBookTitle" placeholder="책 제목..." style="
       width: 100%; box-sizing: border-box;
@@ -1462,6 +1461,8 @@ body { display:flex; justify-content:center; }
       letter-spacing: 2px; cursor: pointer;
     ">[ 책 등록하기 ]</button>
   </div>
+
+  <div class="srch-res" id="srchRes"></div>
 </div>
 
 <!-- NAV -->
@@ -2035,6 +2036,44 @@ function getSayuSketch(bookIdx, chIdx) {
 
   // AI로 추가된 책 기본 스케치 (책마다 다른 패턴)
   var w = '<defs><filter id="wob"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2" xChannelSelector="R" yChannelSelector="G"/></filter></defs>';
+
+  // ── 키워드 기반 스케치 자동 생성 (AI 추가 책) ──
+  if (bookIdx >= 11) {
+    var ch = BOOKS[bookIdx] && BOOKS[bookIdx].chapters ? BOOKS[bookIdx].chapters[chIdx] : null;
+    if (ch && ch.sk) {
+      var c = '#2A0510';
+      var skLib = {
+        'mountain': '<path d="M30 95 L80 25 L130 95Z" stroke="C" stroke-width="2" fill="none"/><path d="M70 95 L110 45 L150 95" stroke="C" stroke-width="1.5" fill="none" opacity="0.4"/><circle cx="170" cy="30" r="10" stroke="C" stroke-width="1.5" fill="none"/>',
+        'tree': '<line x1="100" y1="95" x2="100" y2="45" stroke="C" stroke-width="2.5" stroke-linecap="round"/><circle cx="100" cy="35" r="25" stroke="C" stroke-width="2" fill="none"/><circle cx="85" cy="42" r="12" stroke="C" stroke-width="1.5" fill="none" opacity="0.5"/><circle cx="115" cy="42" r="12" stroke="C" stroke-width="1.5" fill="none" opacity="0.5"/>',
+        'river': '<path d="M20 40 Q60 25 100 45 Q140 65 180 35" stroke="C" stroke-width="2" fill="none"/><path d="M20 55 Q60 40 100 60 Q140 80 180 50" stroke="C" stroke-width="1.5" fill="none" opacity="0.4"/><path d="M20 70 Q60 55 100 75 Q140 95 180 65" stroke="C" stroke-width="1" fill="none" opacity="0.3"/>',
+        'sea': '<path d="M15 50 Q40 35 65 50 Q90 65 115 50 Q140 35 165 50 Q190 65 210 50" stroke="C" stroke-width="2" fill="none"/><path d="M15 65 Q40 50 65 65 Q90 80 115 65 Q140 50 165 65 Q190 80 210 65" stroke="C" stroke-width="1.5" fill="none" opacity="0.5"/><circle cx="170" cy="25" r="12" stroke="C" stroke-width="1.5" fill="none"/>',
+        'flower': '<circle cx="110" cy="40" r="10" stroke="C" stroke-width="2" fill="none"/><path d="M100 30 Q110 15 120 30" stroke="C" stroke-width="1.5" fill="none"/><path d="M120 30 Q135 40 120 50" stroke="C" stroke-width="1.5" fill="none"/><path d="M120 50 Q110 65 100 50" stroke="C" stroke-width="1.5" fill="none"/><path d="M100 50 Q85 40 100 30" stroke="C" stroke-width="1.5" fill="none"/><line x1="110" y1="50" x2="110" y2="95" stroke="C" stroke-width="2" stroke-linecap="round"/>',
+        'star': '<path d="M110 15 L118 38 L142 38 L123 52 L130 75 L110 62 L90 75 L97 52 L78 38 L102 38Z" stroke="C" stroke-width="2" fill="none"/><circle cx="55" cy="30" r="3" fill="C" opacity="0.3"/><circle cx="170" cy="25" r="2" fill="C" opacity="0.3"/>',
+        'moon': '<path d="M120 20 Q100 20 90 40 Q80 60 90 80 Q100 100 120 100 Q105 85 100 60 Q105 35 120 20Z" stroke="C" stroke-width="2" fill="none"/><circle cx="160" cy="30" r="2" fill="C" opacity="0.3"/><circle cx="145" cy="70" r="1.5" fill="C" opacity="0.3"/>',
+        'person': '<circle cx="100" cy="25" r="13" stroke="C" stroke-width="2.2" fill="none"/><line x1="100" y1="38" x2="100" y2="70" stroke="C" stroke-width="2.2" stroke-linecap="round"/><line x1="100" y1="50" x2="80" y2="62" stroke="C" stroke-width="2" stroke-linecap="round"/><line x1="100" y1="50" x2="120" y2="62" stroke="C" stroke-width="2" stroke-linecap="round"/><line x1="100" y1="70" x2="88" y2="95" stroke="C" stroke-width="2" stroke-linecap="round"/><line x1="100" y1="70" x2="112" y2="95" stroke="C" stroke-width="2" stroke-linecap="round"/>',
+        'heart': '<path d="M110 85 Q70 55 80 35 Q90 18 110 35 Q130 18 140 35 Q150 55 110 85Z" stroke="C" stroke-width="2.2" fill="none"/>',
+        'tear': '<path d="M110 25 Q100 50 100 65 Q100 85 110 90 Q120 85 120 65 Q120 50 110 25Z" stroke="C" stroke-width="2" fill="none"/><circle cx="108" cy="60" r="3" fill="C" opacity="0.2"/>',
+        'eye': '<path d="M60 55 Q110 20 160 55 Q110 90 60 55Z" stroke="C" stroke-width="2" fill="none"/><circle cx="110" cy="55" r="15" stroke="C" stroke-width="1.5" fill="none"/><circle cx="110" cy="55" r="6" fill="C" opacity="0.4"/>',
+        'hand': '<path d="M90 90 L90 50 M90 50 L85 25 M90 50 L95 20 M90 50 L105 22 M90 50 L112 28" stroke="C" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M80 50 L75 35" stroke="C" stroke-width="2" stroke-linecap="round"/>',
+        'book': '<rect x="65" y="25" width="50" height="65" rx="2" stroke="C" stroke-width="2" fill="none"/><line x1="90" y1="25" x2="90" y2="90" stroke="C" stroke-width="2"/><path d="M72 40 L87 40 M72 50 L87 50 M72 60 L85 60" stroke="C" stroke-width="1" opacity="0.5"/>',
+        'house': '<path d="M50 55 L110 20 L170 55" stroke="C" stroke-width="2" fill="none"/><rect x="60" y="55" width="100" height="40" stroke="C" stroke-width="2" fill="none"/><rect x="95" y="65" width="20" height="30" stroke="C" stroke-width="1.5" fill="none"/>',
+        'key': '<circle cx="80" cy="40" r="15" stroke="C" stroke-width="2" fill="none"/><line x1="95" y1="40" x2="155" y2="40" stroke="C" stroke-width="2.2" stroke-linecap="round"/><line x1="140" y1="40" x2="140" y2="55" stroke="C" stroke-width="2" stroke-linecap="round"/><line x1="150" y1="40" x2="150" y2="50" stroke="C" stroke-width="2" stroke-linecap="round"/>',
+        'clock': '<circle cx="110" cy="55" r="35" stroke="C" stroke-width="2" fill="none"/><line x1="110" y1="55" x2="110" y2="30" stroke="C" stroke-width="2" stroke-linecap="round"/><line x1="110" y1="55" x2="130" y2="55" stroke="C" stroke-width="1.5" stroke-linecap="round"/><circle cx="110" cy="55" r="3" fill="C"/>',
+        'mirror': '<ellipse cx="110" cy="50" rx="30" ry="40" stroke="C" stroke-width="2" fill="none"/><line x1="110" y1="90" x2="110" y2="105" stroke="C" stroke-width="2.5" stroke-linecap="round"/><line x1="95" y1="105" x2="125" y2="105" stroke="C" stroke-width="2" stroke-linecap="round"/>',
+        'candle': '<rect x="98" y="45" width="24" height="50" rx="2" stroke="C" stroke-width="2" fill="none"/><path d="M110 45 Q105 30 110 18 Q115 30 110 45Z" stroke="C" stroke-width="1.5" fill="none"/><circle cx="110" cy="18" r="4" stroke="C" stroke-width="1" fill="none" opacity="0.5"/>',
+        'bird': '<path d="M60 50 Q80 30 110 35 Q130 38 140 50" stroke="C" stroke-width="2" fill="none"/><path d="M140 50 L160 40" stroke="C" stroke-width="1.8" stroke-linecap="round"/><circle cx="125" cy="38" r="2.5" fill="C"/><path d="M60 50 Q50 65 65 70" stroke="C" stroke-width="1.5" fill="none"/>',
+        'fire': '<path d="M110 90 Q85 65 95 40 Q105 55 110 30 Q115 55 125 40 Q135 65 110 90Z" stroke="C" stroke-width="2" fill="none"/><path d="M110 90 Q100 75 105 60 Q110 70 115 60 Q120 75 110 90Z" stroke="C" stroke-width="1.5" fill="none" opacity="0.5"/>',
+        'road': '<path d="M80 100 L100 15" stroke="C" stroke-width="2" fill="none"/><path d="M140 100 L120 15" stroke="C" stroke-width="2" fill="none"/><path d="M110 95 L110 85 M110 75 L110 65 M110 55 L110 45 M110 35 L110 25" stroke="C" stroke-width="1.5" stroke-dasharray="8 8" opacity="0.4"/>',
+        'bridge': '<path d="M20 55 Q60 25 110 25 Q160 25 200 55" stroke="C" stroke-width="2.2" fill="none"/><line x1="50" y1="42" x2="50" y2="80" stroke="C" stroke-width="1.5"/><line x1="110" y1="25" x2="110" y2="80" stroke="C" stroke-width="1.5"/><line x1="170" y1="42" x2="170" y2="80" stroke="C" stroke-width="1.5"/><line x1="20" y1="80" x2="200" y2="80" stroke="C" stroke-width="1.5"/>',
+        'empty': '<circle cx="110" cy="55" r="40" stroke="C" stroke-width="1.5" fill="none" stroke-dasharray="6 4" opacity="0.4"/><text x="95" y="60" font-family="serif" font-size="14" fill="C" opacity="0.3">&#8709;</text>',
+        'temple': '<path d="M50 40 L110 15 L170 40" stroke="C" stroke-width="2" fill="none"/><line x1="65" y1="40" x2="65" y2="85" stroke="C" stroke-width="2"/><line x1="95" y1="40" x2="95" y2="85" stroke="C" stroke-width="2"/><line x1="125" y1="40" x2="125" y2="85" stroke="C" stroke-width="2"/><line x1="155" y1="40" x2="155" y2="85" stroke="C" stroke-width="2"/><line x1="50" y1="85" x2="170" y2="85" stroke="C" stroke-width="2"/>'
+      };
+      var svg = (skLib[ch.sk] || skLib['book']).replace(/C/g, c);
+      var label = (ch.s || '').length > 10 ? (ch.s || '').slice(0,10) + '…' : (ch.s || '');
+      return '<div class="sayu-sketch"><svg width="220" height="115" viewBox="0 0 220 115" fill="none">' + w + '<g filter="url(#wob)">' + svg + '<text x="30" y="108" font-family="serif" font-size="8" fill="' + c + '" opacity="0.5">' + label + '</text></g></svg></div>';
+    }
+  }
+
   var defaultPatterns = [
     '<svg width="220" height="110" viewBox="0 0 220 110" fill="none">' + w + '<g filter="url(#wob)"><circle cx="110" cy="50" r="35" stroke="#2A0510" stroke-width="1.8" fill="none" opacity="0.4"/><path d="M80 50 L95 35 L110 50 L125 35 L140 50" stroke="#2A0510" stroke-width="1.5" fill="none" opacity="0.5"/><circle cx="110" cy="50" r="8" stroke="#2A0510" stroke-width="1.8" fill="none"/><path d="M120 42 L140 30" stroke="#2A0510" stroke-width="1.3" stroke-linecap="round"/><polygon points="140,30 134,28 135,34" fill="#2A0510"/><text x="142" y="29" font-family="serif" font-size="8" fill="#2A0510">핵심</text><text x="65" y="95" font-family="serif" font-size="8" fill="#2A0510" opacity="0.5">읽고 생각하고 느껴요</text></g></svg>',
     '<svg width="220" height="110" viewBox="0 0 220 110" fill="none">' + w + '<g filter="url(#wob)"><rect x="30" y="20" width="60" height="75" rx="4" stroke="#2A0510" stroke-width="2" fill="none"/><path d="M38 38 L82 38 M38 50 L82 50 M38 62 L70 62 M38 74 L82 74" stroke="#2A0510" stroke-width="1" opacity="0.5"/><circle cx="160" cy="55" r="28" stroke="#2A0510" stroke-width="1.5" fill="none" opacity="0.3" stroke-dasharray="5 3"/><path d="M100 45 L128 48" stroke="#2A0510" stroke-width="1.3" stroke-linecap="round"/><polygon points="128,48 122,45 122,51" fill="#2A0510"/><text x="135" y="35" font-family="serif" font-size="8" fill="#2A0510" opacity="0.6">사유의 공간</text><text x="45" y="105" font-family="serif" font-size="8" fill="#2A0510" opacity="0.5">초록독서 · 밑줄독서</text></g></svg>',
@@ -3932,12 +3971,19 @@ async function generateBookWithAI() {
   var title = document.getElementById('aiBookTitle').value.trim();
   var author = document.getElementById('aiBookAuthor').value.trim();
   var status = document.getElementById('aiStatus');
+  var genBtn = document.querySelector('[onclick="generateBookWithAI()"]');
 
   if (!title) { showToast('책 제목을 입력해주세요'); return; }
 
-  status.textContent = '📚 AI가 분석 중이에요... (30초 정도 걸려요)';
+  if (genBtn) { genBtn.disabled = true; genBtn.style.opacity = '0.5'; }
+  status.innerHTML = '<div style="margin-bottom:8px">📚 AI가 깊이 분석 중... (30~50초)</div><div style="width:100%;height:6px;background:rgba(61,8,20,0.1);border-radius:3px;overflow:hidden"><div id="aiProg" style="width:5%;height:100%;background:linear-gradient(90deg,#3d0814,#E7F9A9);border-radius:3px;transition:width 0.5s"></div></div>';
 
-  var prompt = '책 "' + title + '"(' + (author || '미상') + ') 분석. JSON만 답해(```없이):\n{"title":"제목","author":"저자","emoji":"이모지","genre":"장르","chapters":[{"t":"CH.1","s":"챕터제목","body":"핵심 2문장","qt":"인용구","sm":["요약1","요약2"],"q":"사유질문","fe":"이모지2개","w":[{"w":"단어","d":"뜻","e":"예문"}]}]}\n3챕터로 핵심만. body는 각 2~3문장. 초등학생 눈높이.';
+  var pTimer = setInterval(function() {
+    var bar = document.getElementById('aiProg');
+    if (bar) { var w = parseFloat(bar.style.width); if (w < 88) bar.style.width = (w + Math.random()*3) + '%'; }
+  }, 2000);
+
+  var prompt = '책 제목: "' + title + '"\n저자: "' + (author || '미상') + '"\n\n이 책을 초록독서법+밑줄독서법으로 깊이 분석해서 아래 JSON 형식으로만 답해줘.\n다른 텍스트 없이 순수 JSON만 (```json 마크다운 쓰지 마):\n\n{\n  "title": "책 제목",\n  "author": "저자",\n  "emoji": "대표 이모지 1개",\n  "genre": "장르",\n  "coreLines": ["이 책의 핵심 명문장 1", "핵심 명문장 2", "핵심 명문장 3"],\n  "emotions": [\n    {"ch": "CH.1", "label": "감정명", "color": "#색상코드", "h": 높이숫자40~80}\n  ],\n  "chapters": [\n    {\n      "t": "CH.1",\n      "s": "챕터제목 (날카롭고 짧게)",\n      "body": "핵심내용 3문단. 각 문단 3줄 이상. 초등학생도 이해하되 깊이 있게. 실제 책을 읽은 느낌이 나도록 구체적 장면과 인물 묘사 포함. 문단 구분은 \\n\\n으로.",\n      "qt": "이 챕터의 핵심 인용구/명문장",\n      "sm": ["핵심요약1 (날카롭게)", "핵심요약2", "핵심요약3"],\n      "q": "이 챕터가 내 삶에 묻는 사유 질문 (깊이 있게, 아이도 생각할 수 있게)",\n      "fe": "감정이모지 2개",\n      "sk": "스케치키워드",\n      "w": [{"w": "어려운단어", "d": "뜻풀이", "e": "예문"}]\n    }\n  ]\n}\n\n중요 규칙:\n- chapters는 5~6개로 책 전체를 빠짐없이 커버\n- body는 실제로 그 챕터를 읽은 것처럼 구체적이고 풍부하게\n- 마지막 챕터는 "isLast": true 추가하고 작가의 의도와 결말 요약 포함\n- emotions 배열: 챕터별 감정 흐름 (label: 경이/슬픔/분노/희망/성찰 등, color: 어두운 색상, h: 40~80)\n- coreLines: 책 전체에서 가장 중요한 문장 3개\n- sk는 챕터 핵심 장면을 나타내는 영단어 1개. 다음 중 선택: mountain,tree,river,sea,flower,star,moon,person,heart,tear,eye,hand,book,house,key,clock,mirror,candle,bird,fire,road,bridge,empty,temple';
 
   try {
     var res = await fetch('/.netlify/functions/claude', {
@@ -3946,10 +3992,18 @@ async function generateBookWithAI() {
       body: JSON.stringify({ prompt: prompt })
     });
 
-    if (!res.ok) throw new Error('서버 오류: ' + res.status);
+    var bar = document.getElementById('aiProg');
+    if (bar) bar.style.width = '85%';
+
+    if (!res.ok) {
+      var errText = ''; try { errText = await res.text(); } catch(e2) {}
+      throw new Error('서버 오류: ' + res.status);
+    }
 
     var data = await res.json();
-    if (!data.content) throw new Error(JSON.stringify(data));
+    if (!data.content || !data.content[0]) throw new Error('AI 응답이 비어있어요');
+
+    if (bar) bar.style.width = '92%';
 
     var text = data.content[0].text;
     var clean = text.replace(/```json|```/g, '').trim();
@@ -3957,11 +4011,14 @@ async function generateBookWithAI() {
 
     var newId = BOOKS.length;
     book.id = newId;
-    book.emo = book.emoji || '📚';  // emoji → emo 변환
+    book.emo = book.emoji || '📚';
+    book.coreLines = book.coreLines || [];
+    book.emotions = book.emotions || [];
     book.chapters = book.chapters.map(function(ch, i) {
       ch.fe = ch.fe || '📖';
       ch.sm = ch.sm || [];
       ch.w = ch.w || [];
+      ch.sk = ch.sk || 'book';
       if (i === book.chapters.length - 1) ch.isLast = true;
       return ch;
     });
@@ -3969,17 +4026,22 @@ async function generateBookWithAI() {
     BOOKS.push(book);
     try { _set('bh5_custom_books', BOOKS.slice(11)); } catch(e) {}
 
-    status.textContent = '✅ 완성!';
+    clearInterval(pTimer);
+    if (bar) bar.style.width = '100%';
+    status.textContent = '✅ "' + book.title + '" 완성! (' + book.chapters.length + '챕터)';
     document.getElementById('aiBookTitle').value = '';
     document.getElementById('aiBookAuthor').value = '';
     showToast('📚 ' + book.title + ' 추가 완료!');
-    setTimeout(function() { navTo('home'); renderShelf(); }, 1000);
+    setTimeout(function() { navTo('home'); renderShelf(); }, 1200);
 
   } catch(e) {
     console.error(e);
-    status.innerHTML = '❌ 오류: ' + e.message + '<br>아래에 직접 붙여넣기 해주세요.';
+    clearInterval(pTimer);
+    status.innerHTML = '❌ ' + e.message + '<br>아래에 직접 붙여넣기 해주세요.';
     document.getElementById('aiJsonInput').style.display = 'block';
     document.getElementById('aiJsonBtn').style.display = 'block';
+  } finally {
+    if (genBtn) { genBtn.disabled = false; genBtn.style.opacity = '1'; }
   }
 }
 
