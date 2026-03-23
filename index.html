@@ -3983,7 +3983,7 @@ async function generateBookWithAI() {
     if (bar) { var w = parseFloat(bar.style.width); if (w < 88) bar.style.width = (w + Math.random()*4) + '%'; }
   }, 1500);
 
-  var prompt = '책 "' + title + '"(' + (author || '미상') + ') 분석. JSON만 답해(```없이):\n{"title":"제목","author":"저자","emoji":"이모지","genre":"장르","coreLines":["핵심문장1","핵심문장2","핵심문장3"],"emotions":[{"ch":"CH.1","label":"감정","color":"#색상","h":높이40~80}],"chapters":[{"t":"CH.1","s":"챕터제목","body":"핵심 3문단(\\n\\n구분). 초등학생 눈높이로 구체적 장면 포함. 각 문단 2~3줄.","qt":"인용구","sm":["요약1","요약2","요약3"],"q":"사유질문","fe":"이모지2개","sk":"스케치키워드","w":[{"w":"단어","d":"뜻","e":"예문"}]}]}\n규칙: 5챕터. 마지막은 isLast:true+작가의도/결말. emotions은 챕터별 감정흐름. coreLines은 책 전체 핵심문장3개. sk는 다음 중 1개: mountain,tree,river,sea,flower,star,moon,person,heart,tear,eye,hand,book,house,key,clock,mirror,candle,bird,fire,road,bridge,empty,temple';
+  var prompt = '책 "' + title + '"(' + (author || '미상') + ') 분석. JSON만 답해(```없이):\n{"title":"제목","author":"저자","emoji":"이모지","genre":"장르","coreLines":["핵심문장1","핵심문장2","핵심문장3"],"emotions":[{"ch":"CH.1","label":"감정","color":"#색상","h":높이40~80}],"chapters":[{"t":"CH.1","s":"챕터제목","body":"핵심내용 2문단(\\n\\n구분). 초등학생도 이해하되 실제 책 장면/인물 포함.","qt":"인용구","sm":["요약1","요약2","요약3"],"q":"사유질문","fe":"이모지2개","sk":"스케치키워드","w":[{"w":"단어","d":"뜻","e":"예문"}]}]}\n4챕터. 마지막은 isLast:true+작가의도/결말. emotions은 챕터별 감정흐름. coreLines은 핵심문장3개.\nsk: mountain/tree/river/sea/flower/star/moon/person/heart/tear/eye/hand/book/house/key/clock/mirror/candle/bird/fire/road/bridge/empty/temple 중 1개.\n반드시 실제 책 내용을 정확히 반영해. 모르면 지어내지 말고 "이 책의 정보가 부족합니다"라고 title에 써.';
 
   try {
     var res = await fetch('/.netlify/functions/claude', {
