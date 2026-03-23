@@ -3976,14 +3976,14 @@ async function generateBookWithAI() {
   if (!title) { showToast('책 제목을 입력해주세요'); return; }
 
   if (genBtn) { genBtn.disabled = true; genBtn.style.opacity = '0.5'; }
-  status.innerHTML = '<div style="margin-bottom:8px">📚 AI가 깊이 분석 중... (30~50초)</div><div style="width:100%;height:6px;background:rgba(61,8,20,0.1);border-radius:3px;overflow:hidden"><div id="aiProg" style="width:5%;height:100%;background:linear-gradient(90deg,#3d0814,#E7F9A9);border-radius:3px;transition:width 0.5s"></div></div>';
+  status.innerHTML = '<div style="margin-bottom:8px">📚 AI가 분석 중... (15~25초)</div><div style="width:100%;height:6px;background:rgba(61,8,20,0.1);border-radius:3px;overflow:hidden"><div id="aiProg" style="width:5%;height:100%;background:linear-gradient(90deg,#3d0814,#E7F9A9);border-radius:3px;transition:width 0.5s"></div></div>';
 
   var pTimer = setInterval(function() {
     var bar = document.getElementById('aiProg');
-    if (bar) { var w = parseFloat(bar.style.width); if (w < 88) bar.style.width = (w + Math.random()*3) + '%'; }
-  }, 2000);
+    if (bar) { var w = parseFloat(bar.style.width); if (w < 88) bar.style.width = (w + Math.random()*4) + '%'; }
+  }, 1500);
 
-  var prompt = '책 제목: "' + title + '"\n저자: "' + (author || '미상') + '"\n\n이 책을 초록독서법+밑줄독서법으로 깊이 분석해서 아래 JSON 형식으로만 답해줘.\n다른 텍스트 없이 순수 JSON만 (```json 마크다운 쓰지 마):\n\n{\n  "title": "책 제목",\n  "author": "저자",\n  "emoji": "대표 이모지 1개",\n  "genre": "장르",\n  "coreLines": ["이 책의 핵심 명문장 1", "핵심 명문장 2", "핵심 명문장 3"],\n  "emotions": [\n    {"ch": "CH.1", "label": "감정명", "color": "#색상코드", "h": 높이숫자40~80}\n  ],\n  "chapters": [\n    {\n      "t": "CH.1",\n      "s": "챕터제목 (날카롭고 짧게)",\n      "body": "핵심내용 3문단. 각 문단 3줄 이상. 초등학생도 이해하되 깊이 있게. 실제 책을 읽은 느낌이 나도록 구체적 장면과 인물 묘사 포함. 문단 구분은 \\n\\n으로.",\n      "qt": "이 챕터의 핵심 인용구/명문장",\n      "sm": ["핵심요약1 (날카롭게)", "핵심요약2", "핵심요약3"],\n      "q": "이 챕터가 내 삶에 묻는 사유 질문 (깊이 있게, 아이도 생각할 수 있게)",\n      "fe": "감정이모지 2개",\n      "sk": "스케치키워드",\n      "w": [{"w": "어려운단어", "d": "뜻풀이", "e": "예문"}]\n    }\n  ]\n}\n\n중요 규칙:\n- chapters는 5~6개로 책 전체를 빠짐없이 커버\n- body는 실제로 그 챕터를 읽은 것처럼 구체적이고 풍부하게\n- 마지막 챕터는 "isLast": true 추가하고 작가의 의도와 결말 요약 포함\n- emotions 배열: 챕터별 감정 흐름 (label: 경이/슬픔/분노/희망/성찰 등, color: 어두운 색상, h: 40~80)\n- coreLines: 책 전체에서 가장 중요한 문장 3개\n- sk는 챕터 핵심 장면을 나타내는 영단어 1개. 다음 중 선택: mountain,tree,river,sea,flower,star,moon,person,heart,tear,eye,hand,book,house,key,clock,mirror,candle,bird,fire,road,bridge,empty,temple';
+  var prompt = '책 "' + title + '"(' + (author || '미상') + ') 분석. JSON만 답해(```없이):\n{"title":"제목","author":"저자","emoji":"이모지","genre":"장르","coreLines":["핵심문장1","핵심문장2","핵심문장3"],"emotions":[{"ch":"CH.1","label":"감정","color":"#색상","h":높이40~80}],"chapters":[{"t":"CH.1","s":"챕터제목","body":"핵심 3문단(\\n\\n구분). 초등학생 눈높이로 구체적 장면 포함. 각 문단 2~3줄.","qt":"인용구","sm":["요약1","요약2","요약3"],"q":"사유질문","fe":"이모지2개","sk":"스케치키워드","w":[{"w":"단어","d":"뜻","e":"예문"}]}]}\n규칙: 5챕터. 마지막은 isLast:true+작가의도/결말. emotions은 챕터별 감정흐름. coreLines은 책 전체 핵심문장3개. sk는 다음 중 1개: mountain,tree,river,sea,flower,star,moon,person,heart,tear,eye,hand,book,house,key,clock,mirror,candle,bird,fire,road,bridge,empty,temple';
 
   try {
     var res = await fetch('/.netlify/functions/claude', {
