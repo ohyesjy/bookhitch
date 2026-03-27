@@ -1327,21 +1327,15 @@ body { display:flex; justify-content:center; }
         <div class="today-arrow">ENTER TO READ ▌</div>
       </div>
     </div>
-    <div class="sec fu3">// STREAK</div>
-    <div class="streak-wrap fu3">
-      <div class="streak-row">
-        <div>
-          <div class="streak-num">3</div>
-          <div class="streak-lbl">days in a row</div>
-        </div>
-        <div class="streak-days">
-          <div class="s-day on">월</div>
-          <div class="s-day on">화</div>
-          <div class="s-day on">수</div>
-          <div class="s-day">목</div>
-          <div class="s-day">금</div>
-          <div class="s-day">토</div>
-          <div class="s-day">일</div>
+    <div class="sec fu3">// 🧠 오늘의 뇌자극 퀴즈</div>
+    <div class="streak-wrap fu3" id="quizWrap" onclick="showNextQuiz()" style="cursor:pointer">
+      <div style="display:flex; gap:14px; align-items:center; padding:14px 0; border-bottom:1px solid var(--dimmer);">
+        <div id="quizSketch" style="flex-shrink:0"></div>
+        <div style="flex:1">
+          <div id="quizQuestion" style="font-family:var(--font); font-size:13px; color:var(--accent); line-height:1.6; font-weight:bold;"></div>
+          <div id="quizOptions" style="margin-top:10px;"></div>
+          <div id="quizResult" style="margin-top:8px; font-family:var(--font); font-size:12px; display:none;"></div>
+          <div style="margin-top:8px; font-size:9px; color:var(--green3); letter-spacing:1px;">TAP FOR NEXT QUIZ →</div>
         </div>
       </div>
     </div>
@@ -3335,6 +3329,138 @@ function renderToday() {
     document.getElementById('nav-reader').classList.add('active');
     renderChTabs(cIdx);
   };
+  // 퀴즈 초기화
+  initQuiz();
+}
+
+// ══ 뇌자극 퀴즈 시스템 ══
+var quizPool = [];
+var quizIdx = 0;
+
+function getQuizSketch(type) {
+  var w = '<defs><filter id="qwob"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G"/></filter></defs>';
+  var c = '#2A0510';
+  var sketches = {
+    // 머리 터지는 사람
+    'brain': '<circle cx="40" cy="28" r="16" stroke="C" stroke-width="2" fill="none"/><path d="M28 20 Q40 5 52 20" stroke="C" stroke-width="1.5" fill="none"/><path d="M32 15 L28 8 M40 12 L40 4 M48 15 L52 8" stroke="C" stroke-width="1.5" stroke-linecap="round"/><text x="35" y="32" font-family="serif" font-size="7" fill="C">?!</text><line x1="40" y1="44" x2="40" y2="65" stroke="C" stroke-width="2" stroke-linecap="round"/><line x1="40" y1="52" x2="28" y2="60" stroke="C" stroke-width="1.5" stroke-linecap="round"/><line x1="40" y1="52" x2="52" y2="58" stroke="C" stroke-width="1.5" stroke-linecap="round"/>',
+    // 책 먹는 벌레
+    'worm': '<rect x="15" y="20" width="30" height="40" rx="2" stroke="C" stroke-width="2" fill="none"/><path d="M22 30 L40 30 M22 38 L38 38 M22 46 L35 46" stroke="C" stroke-width="0.8" opacity="0.4"/><path d="M45 35 Q55 30 58 38 Q62 48 55 50 Q48 52 50 42" stroke="C" stroke-width="2" fill="none"/><circle cx="58" cy="36" r="2" fill="C"/><text x="52" y="62" font-family="serif" font-size="6" fill="C">냠냠</text>',
+    // 전구 번쩍
+    'bulb': '<path d="M40 15 Q25 15 25 30 Q25 42 35 47 L35 55 L45 55 L45 47 Q55 42 55 30 Q55 15 40 15Z" stroke="C" stroke-width="2" fill="none"/><line x1="35" y1="58" x2="45" y2="58" stroke="C" stroke-width="1.5"/><line x1="36" y1="61" x2="44" y2="61" stroke="C" stroke-width="1.5"/><path d="M40 5 L40 10 M20 25 L15 22 M60 25 L65 22 M22 40 L16 43 M58 40 L64 43" stroke="C" stroke-width="1.2" stroke-linecap="round"/>',
+    // 물음표 폭탄
+    'bomb': '<circle cx="40" cy="40" r="20" stroke="C" stroke-width="2" fill="none"/><path d="M40 20 Q42 15 45 12 Q48 10 50 8" stroke="C" stroke-width="2" stroke-linecap="round"/><path d="M48 6 L52 3 M50 8 L55 7 M49 10 L53 12" stroke="C" stroke-width="1" stroke-linecap="round"/><text x="33" y="47" font-family="serif" font-size="20" fill="C" font-weight="bold">?</text>',
+    // 눈이 빙글빙글
+    'dizzy': '<circle cx="40" cy="30" r="18" stroke="C" stroke-width="2" fill="none"/><path d="M30 27 Q33 22 36 27 Q33 32 30 27Z" stroke="C" stroke-width="1.2" fill="none"/><path d="M44 27 Q47 22 50 27 Q47 32 44 27Z" stroke="C" stroke-width="1.2" fill="none"/><path d="M34 38 Q40 42 46 38" stroke="C" stroke-width="1.5" fill="none"/><path d="M22 15 L18 10 M58 15 L62 10" stroke="C" stroke-width="1.5" stroke-linecap="round"/><line x1="40" y1="48" x2="40" y2="65" stroke="C" stroke-width="2" stroke-linecap="round"/>',
+    // 생각하는 고양이
+    'cat': '<ellipse cx="40" cy="35" rx="18" ry="15" stroke="C" stroke-width="2" fill="none"/><path d="M24 25 L20 12 L30 22" stroke="C" stroke-width="1.8" fill="none"/><path d="M56 25 L60 12 L50 22" stroke="C" stroke-width="1.8" fill="none"/><circle cx="33" cy="32" r="2.5" fill="C"/><circle cx="47" cy="32" r="2.5" fill="C"/><path d="M37 38 L40 40 L43 38" stroke="C" stroke-width="1.2" stroke-linecap="round"/><path d="M56 28 L65 25 M56 32 L65 32 M56 36 L63 38" stroke="C" stroke-width="0.8" stroke-linecap="round"/><circle cx="68" cy="18" r="6" stroke="C" stroke-width="1" fill="none" stroke-dasharray="2 2"/><text x="65" y="21" font-family="serif" font-size="6" fill="C">?</text>'
+  };
+  var keys = Object.keys(sketches);
+  var svg = sketches[type] || sketches[keys[Math.floor(Math.random() * keys.length)]];
+  svg = svg.replace(/C/g, c);
+  return '<svg width="80" height="70" viewBox="0 0 80 70" fill="none">' + w + '<g filter="url(#qwob)">' + svg + '</g></svg>';
+}
+
+function initQuiz() {
+  quizPool = [];
+  // 모든 책에서 퀴즈 생성
+  BOOKS.forEach(function(book, bi) {
+    if (!book.chapters) return;
+    book.chapters.forEach(function(ch, ci) {
+      // 요약 기반 O/X 퀴즈
+      if (ch.sm && ch.sm.length > 0) {
+        quizPool.push({
+          type: 'ox',
+          book: book.title,
+          q: '"' + book.title + '" - 다음 내용이 맞을까?',
+          statement: ch.sm[0],
+          answer: true,
+          sketch: ['brain','worm','bulb','bomb','dizzy','cat'][Math.floor(Math.random()*6)]
+        });
+      }
+      // 챕터 제목 맞히기
+      if (ch.s && ch.body) {
+        var bodySnippet = ch.body.slice(0, 60) + '...';
+        quizPool.push({
+          type: 'title',
+          book: book.title,
+          q: '"' + book.title + '" - 이 내용의 챕터 제목은?',
+          hint: bodySnippet,
+          answer: ch.s,
+          sketch: ['brain','bulb','cat','dizzy'][Math.floor(Math.random()*4)]
+        });
+      }
+      // 단어 뜻 맞히기
+      if (ch.w && ch.w.length > 0) {
+        var word = ch.w[0];
+        quizPool.push({
+          type: 'word',
+          book: book.title,
+          q: '"' + word.w + '"의 뜻은?',
+          answer: word.d,
+          wrong1: '기억이 안 나요...',
+          sketch: ['worm','bomb','cat'][Math.floor(Math.random()*3)]
+        });
+      }
+    });
+  });
+  // 셔플
+  for (var i = quizPool.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = quizPool[i]; quizPool[i] = quizPool[j]; quizPool[j] = tmp;
+  }
+  quizIdx = 0;
+  showQuiz();
+}
+
+function showQuiz() {
+  if (!quizPool.length) {
+    var wrap = document.getElementById('quizWrap');
+    if (wrap) wrap.innerHTML = '<div style="padding:14px 0; text-align:center; font-family:var(--font); font-size:12px; color:var(--green3);">책을 읽고 퀴즈를 풀어보세요!</div>';
+    return;
+  }
+  var quiz = quizPool[quizIdx % quizPool.length];
+  var sketchEl = document.getElementById('quizSketch');
+  var qEl = document.getElementById('quizQuestion');
+  var optEl = document.getElementById('quizOptions');
+  var resEl = document.getElementById('quizResult');
+  if (!sketchEl || !qEl) return;
+
+  sketchEl.innerHTML = getQuizSketch(quiz.sketch);
+  resEl.style.display = 'none';
+
+  if (quiz.type === 'ox') {
+    qEl.innerHTML = quiz.q + '<br><span style="font-weight:normal;font-size:12px;color:#6A3040;">"' + quiz.statement + '"</span>';
+    optEl.innerHTML = '<button onclick="event.stopPropagation();answerQuiz(true)" style="padding:6px 16px;margin-right:8px;background:var(--accent);color:#E7F9A9;border:none;border-radius:6px;font-family:var(--mono);font-size:11px;cursor:pointer">⭕ 맞아</button>'
+      + '<button onclick="event.stopPropagation();answerQuiz(false)" style="padding:6px 16px;background:#8B3040;color:#FFE0E0;border:none;border-radius:6px;font-family:var(--mono);font-size:11px;cursor:pointer">❌ 아니야</button>';
+  } else if (quiz.type === 'word') {
+    qEl.innerHTML = quiz.q;
+    optEl.innerHTML = '<button onclick="event.stopPropagation();revealAnswer()" style="padding:6px 16px;background:var(--accent);color:#E7F9A9;border:none;border-radius:6px;font-family:var(--mono);font-size:11px;cursor:pointer">🤔 정답 보기</button>';
+  } else {
+    qEl.innerHTML = quiz.q + '<br><span style="font-weight:normal;font-size:11px;color:#6A3040;">' + quiz.hint + '</span>';
+    optEl.innerHTML = '<button onclick="event.stopPropagation();revealAnswer()" style="padding:6px 16px;background:var(--accent);color:#E7F9A9;border:none;border-radius:6px;font-family:var(--mono);font-size:11px;cursor:pointer">💡 정답 확인</button>';
+  }
+}
+
+function answerQuiz(userAnswer) {
+  var quiz = quizPool[quizIdx % quizPool.length];
+  var resEl = document.getElementById('quizResult');
+  var correct = (userAnswer === quiz.answer);
+  resEl.style.display = 'block';
+  resEl.innerHTML = correct
+    ? '<span style="color:#2A6040">🎉 정답! 기억력 짱!</span>'
+    : '<span style="color:#8B3040">😅 아쉽! 다시 읽어볼까?</span>';
+}
+
+function revealAnswer() {
+  var quiz = quizPool[quizIdx % quizPool.length];
+  var resEl = document.getElementById('quizResult');
+  resEl.style.display = 'block';
+  resEl.innerHTML = '<span style="color:#2A6040">💡 정답: ' + quiz.answer + '</span>';
+}
+
+function showNextQuiz() {
+  quizIdx++;
+  showQuiz();
 }
 
 function selectBook(bookIdx) {
