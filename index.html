@@ -3983,7 +3983,7 @@ async function generateBookWithAI() {
     if (bar) { var w = parseFloat(bar.style.width); if (w < 88) bar.style.width = (w + Math.random()*4) + '%'; }
   }, 1500);
 
-  var prompt = '책 "' + title + '"(' + (author || '미상') + '). 간결하게 JSON만 답해(```없이):\n{"title":"제목","author":"저자","emoji":"이모지","genre":"장르","coreLines":["핵심문장1","핵심문장2","핵심문장3"],"emotions":[{"ch":"CH.1","label":"감정","color":"#색상","h":높이40~80}],"chapters":[{"t":"CH.1","s":"챕터제목","body":"핵심내용 5줄(\\n\\n으로 문단구분). 초등 고학년 눈높이로 구체적 장면과 인물 포함.","qt":"인용구","sm":["요약1","요약2"],"q":"사유질문","fe":"이모지2개","sk":"키워드","w":[{"w":"초등고학년이 모를 어려운단어","d":"쉬운뜻풀이","e":"예문"},{"w":"단어2","d":"뜻","e":"예문"}]}]}\n4챕터. 마지막 isLast:true+작가의도. w는 본문에 나온 초등고학년이 모를법한 어려운 단어 2~3개씩 꼭 포함.\nsk: mountain/tree/river/sea/flower/star/moon/person/heart/tear/eye/hand/book/house/key/clock/mirror/candle/bird/fire/road/bridge/empty/temple 중 1개.\n실제 책 내용 반영. 모르면 title에 "정보부족"이라고 써.';
+  var prompt = '책 "' + title + '"(' + (author || '미상') + '). JSON만(```없이):\n{"title":"제목","author":"저자","emoji":"이모지","genre":"장르","coreLines":["명문장1","명문장2","명문장3"],"emotions":[{"ch":"CH.1","label":"감정","color":"#색상","h":높이}],"chapters":[{"t":"CH.1","s":"제목","body":"5줄 핵심내용. 초등고학년 눈높이. 구체적 장면과 인물.","qt":"인용구","sm":["요약1","요약2"],"q":"사유질문","fe":"이모지2개","sk":"키워드","w":[{"w":"어려운단어","d":"쉬운뜻","e":"예문"}]}]}\n3챕터만. 마지막 isLast:true+작가의도. w는 초등고학년이 모를 단어 2개씩. sk:mountain/tree/river/sea/flower/star/moon/person/heart/tear/eye/hand/book/house/key/clock/mirror/candle/bird/fire/road/bridge/empty/temple. 실제 책 내용만. 모르면 title에 "정보부족".';
 
   try {
     var res = await fetch('/.netlify/functions/claude', {
