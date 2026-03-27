@@ -4268,6 +4268,30 @@ function renderSrch(q) {
 function filterBooks(v) { renderSrch(v); }
 
 window.addEventListener('load', function() {
+  // 커스텀 책 로드 (AI로 추가한 책들)
+  try {
+    var customBooks = _get('bh5_custom_books', []);
+    if (customBooks && customBooks.length > 0) {
+      customBooks.forEach(function(book, i) {
+        book.id = BOOKS.length;
+        book.emo = book.emo || book.emoji || '📚';
+        book.chapters = (book.chapters || []).map(function(ch, ci) {
+          ch.fe = ch.fe || '📖';
+          ch.sm = ch.sm || [];
+          ch.w = ch.w || [];
+          ch.sk = ch.sk || 'book';
+          return ch;
+        });
+        BOOKS.push(book);
+        // 음악도 자동 생성
+        if (typeof generateBookMusic === 'function') {
+          generateBookMusic(book.id, book.genre || '');
+        }
+      });
+      console.log('Loaded ' + customBooks.length + ' custom books');
+    }
+  } catch(e) { console.warn('Custom books load error', e); }
+
   try { renderSrch(''); }    catch(e) { console.warn('renderSrch error', e); }
   try { renderShelf(); }     catch(e) { console.warn('renderShelf error', e); }
   try { renderToday(); }     catch(e) { console.warn('renderToday error', e); }
