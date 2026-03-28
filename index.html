@@ -3743,87 +3743,116 @@ function renderShelf() {
   var list = document.getElementById('shelfList');
   if (!list) return;
 
-  // 한글 자음 추출 함수
-  function getConsonant(str) {
-    var c = str.charCodeAt(0);
-    if (c >= 0xAC00 && c <= 0xD7A3) {
-      var idx = Math.floor((c - 0xAC00) / 588);
-      return ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'][idx] || 'etc';
-    }
-    if (/[a-zA-Z]/.test(str[0])) return 'ABC';
-    if (/[0-9]/.test(str[0])) return '0-9';
-    return 'etc';
+  // 카드 스와이프 UI
+  if (!window._shelfCardIdx) window._shelfCardIdx = 0;
+  var ci = window._shelfCardIdx;
+  if (ci >= BOOKS.length) ci = 0;
+  if (ci < 0) ci = BOOKS.length - 1;
+  window._shelfCardIdx = ci;
+
+  var book = BOOKS[ci];
+  var prog = getBookProgress(ci);
+  var delBtn = (ci >= 11 && !book._builtin) ? '<div onclick="event.stopPropagation();deleteCustomBook(' + ci + ')" style="text-align:center;margin-top:8px;color:#C04040;font-size:11px;font-family:var(--mono);cursor:pointer">[ 삭제 ]</div>' : '';
+
+  // 장르 태그 색상
+  var genreColors = {'소설':'#6040A0','동화':'#40A060','철학':'#E8A040','과학':'#4060C0','시':'#C04060','에세이':'#608040','성장':'#40A060','풍자':'#C04040','판타지':'#6040A0','신화':'#E8A040'};
+  var genre = book.genre || '';
+  var gColor = '#8A8A40';
+  Object.keys(genreColors).forEach(function(k) { if (genre.indexOf(k) >= 0) gColor = genreColors[k]; });
+
+  var out = '<div style="position:relative;padding:10px 0">';
+
+  // 좌우 화살표
+  out += '<div style="display:flex;align-items:center;gap:6px">';
+  out += '<button onclick="event.stopPropagation();shelfPrev()" style="width:36px;height:80px;background:none;border:1px solid rgba(61,8,20,0.15);border-radius:8px;font-size:18px;color:var(--accent);cursor:pointer;flex-shrink:0">◀</button>';
+
+  // 카드 본체
+  out += '<div onclick="selectBook(' + ci + ')" style="flex:1;background:rgba(255,255,255,0.5);border:1px solid rgba(61,8,20,0.12);border-radius:14px;padding:18px;cursor:pointer;min-height:100px;position:relative;overflow:hidden">';
+
+  // 이모지 + 제목
+  out += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">';
+  out += '<span style="font-size:32px">' + book.emo + '</span>';
+  out += '<div>';
+  out += '<div style="font-family:var(--font);font-size:15px;font-weight:bold;color:var(--accent)">' + book.title + '</div>';
+  out += '<div style="font-family:var(--font);font-size:11px;color:var(--green3);margin-top:2px">' + book.author + '</div>';
+  out += '</div></div>';
+
+  // 장르 태그
+  if (genre) {
+    out += '<span style="display:inline-block;padding:3px 10px;background:' + gColor + ';color:#fff;border-radius:20px;font-size:9px;font-family:var(--mono);letter-spacing:1px;margin-bottom:8px">' + genre + '</span> ';
   }
 
-  // 쌍자음을 기본 자음으로 합치기
-  function normalizeConsonant(c) {
-    var map = {'ㄲ':'ㄱ','ㄸ':'ㄷ','ㅃ':'ㅂ','ㅆ':'ㅅ','ㅉ':'ㅈ'};
-    return map[c] || c;
+  // 챕터 수 + 진도
+  out += '<span style="font-size:9px;font-family:var(--mono);color:var(--green3);letter-spacing:1px">' + book.chapters.length + ' CHAPTERS</span>';
+
+  // 핵심문장 미리보기
+  if (book.coreLines && book.coreLines[0]) {
+    out += '<div style="margin-top:10px;padding:10px;background:rgba(61,8,20,0.04);border-radius:8px;font-family:var(--font);font-size:11px;color:#6A3040;line-height:1.6;font-style:italic">"' + book.coreLines[0] + '"</div>';
   }
 
-  // 자음별로 그룹핑
-  var groups = {};
-  BOOKS.forEach(function(book, i) {
-    var con = normalizeConsonant(getConsonant(book.title));
-    if (!groups[con]) groups[con] = [];
-    groups[con].push({ book: book, idx: i });
+  // 진도 바
+  out += '<div style="margin-top:12px;display:flex;align-items:center;gap:8px">';
+  out += '<div style="flex:1;height:4px;background:rgba(61,8,20,0.1);border-radius:2px;overflow:hidden"><div style="width:' + prog.pct + '%;height:100%;background:var(--accent);border-radius:2px;transition:width 0.3s"></div></div>';
+  out += '<span style="font-family:var(--mono);font-size:10px;color:' + (prog.isDone ? 'var(--green3)' : 'var(--dim)') + '">' + prog.status + '</span>';
+  out += '</div>';
+
+  out += '</div>'; // 카드 끝
+
+  out += '<button onclick="event.stopPropagation();shelfNext()" style="width:36px;height:80px;background:none;border:1px solid rgba(61,8,20,0.15);border-radius:8px;font-size:18px;color:var(--accent);cursor:pointer;flex-shrink:0">▶</button>';
+  out += '</div>';
+
+  // 카운터 + 도트
+  out += '<div style="text-align:center;margin-top:6px">';
+  out += '<span style="font-family:var(--mono);font-size:10px;color:var(--green3)">' + (ci + 1) + ' / ' + BOOKS.length + '</span>';
+  out += '</div>';
+
+  // 도트 인디케이터
+  out += '<div style="display:flex;justify-content:center;gap:4px;margin-top:6px;flex-wrap:wrap;max-width:200px;margin-left:auto;margin-right:auto">';
+  BOOKS.forEach(function(b, i) {
+    var dotColor = i === ci ? 'var(--accent)' : 'rgba(61,8,20,0.15)';
+    var dotSize = i === ci ? '8px' : '5px';
+    out += '<div onclick="event.stopPropagation();goShelfCard(' + i + ')" style="width:' + dotSize + ';height:' + dotSize + ';border-radius:50%;background:' + dotColor + ';cursor:pointer;transition:all 0.2s"></div>';
   });
+  out += '</div>';
 
-  // 자음 정렬 순서
-  var order = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','ABC','0-9','etc'];
-  var sortedKeys = Object.keys(groups).sort(function(a,b) {
-    return order.indexOf(a) - order.indexOf(b);
-  });
+  out += delBtn;
 
-  // 펼침 상태 관리
-  if (!window._shelfOpen) window._shelfOpen = {};
+  // ADD 버튼
+  out += '<div class="shelf-add" onclick="goAddBook()" style="margin-top:12px"><span class="shelf-idx" style="color:var(--dim)">[+]</span><span class="shelf-emo" style="opacity:0.3">📚</span><div class="shelf-add-txt">ADD NEW BOOK</div></div>';
 
-  var out = '';
-  sortedKeys.forEach(function(con) {
-    var items = groups[con];
-    var isOpen = window._shelfOpen[con];
-    var count = items.length;
-
-    // 자음 헤더 (탭하면 펼침/접힘)
-    out += '<div onclick="toggleShelfGroup(\'' + con + '\')" style="display:flex;align-items:center;gap:8px;padding:10px 0;cursor:pointer;border-bottom:1px solid rgba(61,8,20,0.08)">'
-      + '<span style="font-family:var(--vt);font-size:22px;color:var(--accent);width:36px;text-align:center">' + con + '</span>'
-      + '<span style="font-family:var(--mono);font-size:10px;color:var(--green3);letter-spacing:1px">' + count + '권</span>'
-      + '<span style="margin-left:auto;font-size:12px;color:var(--dim)">' + (isOpen ? '▼' : '▶') + '</span>'
-      + '</div>';
-
-    // 책 목록 (펼쳐진 경우만)
-    if (isOpen) {
-      items.forEach(function(item) {
-        var book = item.book;
-        var i = item.idx;
-        var prog = getBookProgress(i);
-        var isDone = prog.isDone;
-        var statusColor = isDone ? 'var(--green3)' : '';
-        var fillOpacity = isDone ? ';opacity:0.35' : '';
-        var delBtn = (i >= 11 && !book._builtin) ? '<button onclick="event.stopPropagation();deleteCustomBook(' + i + ')" style="background:none;border:none;color:#C04040;font-size:11px;padding:4px 8px;font-family:var(--mono);cursor:pointer">✕</button>' : '';
-        out += '<div class="shelf-item" onclick="selectBook(' + i + ')" style="padding-left:20px">'
-          + '<span class="shelf-emo">' + book.emo + '</span>'
-          + '<div class="shelf-info">'
-          + '<div class="shelf-ttl">' + book.title + '</div>'
-          + '<div class="shelf-auth">' + book.author + '</div>'
-          + '</div>'
-          + '<div class="shelf-bar"><div class="shelf-bar-fill" style="width:' + prog.pct + '%' + fillOpacity + '"></div></div>'
-          + '<div class="shelf-status"' + (statusColor ? ' style="color:' + statusColor + '"' : '') + '>' + prog.status + '</div>'
-          + delBtn
-          + '</div>';
-      });
-    }
-  });
-
-  out += '<div class="shelf-add" onclick="goAddBook()"><span class="shelf-idx" style="color:var(--dim)">[+]</span><span class="shelf-emo" style="opacity:0.3">📚</span><div class="shelf-add-txt">ADD NEW BOOK</div></div>';
   list.innerHTML = out;
+
+  // 터치 스와이프 지원
+  var card = list.querySelector('[onclick^="selectBook"]');
+  if (card) {
+    var startX = 0;
+    card.addEventListener('touchstart', function(e) { startX = e.touches[0].clientX; }, {passive:true});
+    card.addEventListener('touchend', function(e) {
+      var diff = e.changedTouches[0].clientX - startX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) shelfPrev(); else shelfNext();
+        e.preventDefault();
+      }
+    });
+  }
 }
 
-function toggleShelfGroup(con) {
-  if (!window._shelfOpen) window._shelfOpen = {};
-  window._shelfOpen[con] = !window._shelfOpen[con];
+function shelfPrev() {
+  window._shelfCardIdx = (window._shelfCardIdx || 0) - 1;
+  if (window._shelfCardIdx < 0) window._shelfCardIdx = BOOKS.length - 1;
   renderShelf();
 }
+function shelfNext() {
+  window._shelfCardIdx = (window._shelfCardIdx || 0) + 1;
+  if (window._shelfCardIdx >= BOOKS.length) window._shelfCardIdx = 0;
+  renderShelf();
+}
+function goShelfCard(idx) {
+  window._shelfCardIdx = idx;
+  renderShelf();
+}
+
+function toggleShelfGroup() {} // 레거시 호환
 
 function renderToday() {
   var last = null;
