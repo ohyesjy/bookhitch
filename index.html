@@ -3766,7 +3766,7 @@ function renderShelf() {
   function normCon(c) { return {'ㄲ':'ㄱ','ㄸ':'ㄷ','ㅃ':'ㅂ','ㅆ':'ㅅ','ㅉ':'ㅈ'}[c] || c; }
 
   // 현재 필터
-  if (!window._shelfFilter) window._shelfFilter = '전체';
+  if (!window._shelfFilter) window._shelfFilter = '전체'; // 전체 허용
   var filter = window._shelfFilter;
 
   // 필터된 책 목록
@@ -3786,8 +3786,8 @@ function renderShelf() {
   // 사용 중인 자음 목록
   var usedCons = {};
   BOOKS.forEach(function(b) { usedCons[normCon(getConsonant(b.title))] = true; });
-  var allCons = ['전체','ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','A'];
-  var activeCons = allCons.filter(function(c) { return c === '전체' || usedCons[c]; });
+  var allCons = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','A'];
+  var activeCons = allCons.filter(function(c) { return usedCons[c]; });
 
   var out = '';
 
