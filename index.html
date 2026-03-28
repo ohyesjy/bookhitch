@@ -35,7 +35,6 @@
 }
 
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-html { font-size: 110%; }
 html, body { height:100%; overflow:hidden; background:#E7F9A9; font-family:var(--font); }
 body { display:flex; justify-content:center; }
 
@@ -1340,10 +1339,10 @@ body { display:flex; justify-content:center; }
     </div>
     <div class="sec fu3">// 🧠 오늘의 뇌자극 퀴즈</div>
     <div class="streak-wrap fu3" id="quizWrap" onclick="showNextQuiz()" style="cursor:pointer">
-      <div style="display:flex; gap:14px; align-items:center; padding:5px 0; border-bottom:1px solid var(--dimmer); position:relative;">
+      <div style="display:flex; gap:14px; align-items:flex-start; padding:5px 0; border-bottom:1px solid var(--dimmer); position:relative;">
         <div id="quizSketch" style="flex-shrink:0"></div>
         <div style="flex:1">
-          <div id="quizQuestion" style="font-family:var(--font); font-size:11px; color:var(--accent); line-height:1.4; font-weight:bold;"></div>
+          <div id="quizQuestion" style="font-family:var(--font); font-size:14px; color:var(--accent); line-height:1.5; font-weight:bold; word-break:keep-all; overflow:visible;"></div>
           <div id="quizOptions" style="margin-top:6px;"></div>
           <div id="quizResult" style="margin-top:5px; font-family:var(--font); font-size:12px; display:none;"></div>
           <div style="margin-top:5px; font-size:9px; color:var(--green3); letter-spacing:1px;">TAP FOR NEXT QUIZ →</div>
