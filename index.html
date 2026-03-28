@@ -1322,6 +1322,57 @@ body { display:flex; justify-content:center; }
 
 <!-- HOME -->
 <div id="home" class="screen active">
+  <!-- WAVY LINE RIGHT SIDE -->
+  <canvas id="wavyLine" style="
+    position:absolute;
+    top:0; right:8px;
+    width:40px; height:100%;
+    pointer-events:none;
+    z-index:0;
+    opacity:0.45;
+  "></canvas>
+  <script>
+  (function(){
+    var c = document.getElementById('wavyLine');
+    if(!c) return;
+    function resize(){
+      c.width = 40;
+      c.height = c.parentElement.scrollHeight || window.innerHeight * 2;
+    }
+    resize();
+    var ctx = c.getContext('2d');
+    var t = 0;
+
+    function draw(){
+      c.height = c.parentElement.scrollHeight || 1400;
+      ctx.clearRect(0,0,c.width,c.height);
+      var H = c.height;
+      var W = c.width;
+      var cx = W * 0.55;
+
+      ctx.beginPath();
+      ctx.strokeStyle = '#2a3a18';
+      ctx.lineWidth = 1.4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      var steps = 200;
+      for(var i=0;i<=steps;i++){
+        var y = (i/steps)*H;
+        var wave = Math.sin(y*0.013 + t*0.5) * 11
+                 + Math.sin(y*0.022 + t*0.35 + 1.2) * 5
+                 + (Math.random()-0.5)*0.4; // sketch wobble
+        var x = cx + wave;
+        if(i===0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+      t += 0.008;
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+  </script>
   <div class="home-wrap">
     <div class="home-hd fu">
       <div class="app-name" onclick="navTo('home')" style="cursor:pointer">BOOKHITCH</div>
