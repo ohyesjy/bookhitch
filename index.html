@@ -1471,8 +1471,8 @@ body { display:flex; justify-content:center; }
 
 <!-- NAV -->
 <div class="nav">
-  <button class="n-btn" id="nav-reader" onclick="goReader()">
-    <span class="n-ico">▶</span><span class="n-lbl">Read</span>
+  <button class="n-btn" id="nav-reader" onclick="history.back()">
+    <span class="n-ico">←</span><span class="n-lbl">Back</span>
   </button>
   <button class="n-btn" id="nav-highlights" onclick="navTo('highlights')">
     <span class="n-ico">—</span><span class="n-lbl">My Notes</span>
@@ -3855,7 +3855,7 @@ function renderShelf() {
     }, 50);
   }
 
-  out += '<div class="shelf-add" onclick="goAddBook()" style="margin-top:10px"><span class="shelf-idx" style="color:var(--accent); font-weight:700">[+]</span><span class="shelf-emo">📚</span><div class="shelf-add-txt">ADD NEW BOOK</div></div>';
+  out += '<div class="shelf-add" onclick="goAddBook()" style="margin-top:10px"><span class="shelf-idx" style="color:var(--accent); font-weight:700">[+]</span><div class="shelf-add-txt">ADD NEW BOOK</div></div>';
   list.innerHTML = out;
 }
 
