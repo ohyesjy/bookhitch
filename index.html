@@ -4196,11 +4196,52 @@ function loadCh(idx, tabEl) {
 
 var hlActiveBook = -1; // -1 = 전체
 
+// ── MY NOTES 자음 필터 ──
+function _hlGetCon(str) {
+  var c = str.charCodeAt(0);
+  if (c >= 0xAC00 && c <= 0xD7A3) {
+    var i = Math.floor((c - 0xAC00) / 588);
+    var r = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'][i] || 'etc';
+    return {'ㄲ':'ㄱ','ㄸ':'ㄷ','ㅃ':'ㅂ','ㅆ':'ㅅ','ㅉ':'ㅈ'}[r] || r;
+  }
+  if (/[a-zA-Z]/.test(str[0])) return 'A';
+  return 'etc';
+}
+window._hlCon = window._hlCon || '전체';
+
+function renderHLConBar() {
+  var bar = document.getElementById('hlConBar');
+  if (!bar) return;
+  var used = {};
+  BOOKS.forEach(function(b) { used[_hlGetCon(b.title)] = true; });
+  var all = ['전체','ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','A'];
+  var active = all.filter(function(c) { return c === '전체' || used[c]; });
+  var out = '';
+  active.forEach(function(c) {
+    var on = window._hlCon === c;
+    var bg = on ? '#504840' : 'rgba(160,152,136,0.15)';
+    var col = on ? '#EDE8E0' : '#706860';
+    var sz = c === '전체' ? 'padding:4px 10px' : 'width:30px;height:30px;display:flex;align-items:center;justify-content:center';
+    out += '<button onclick="hlFilterCon('' + c + '')" style="' + sz + ';background:' + bg + ';color:' + col + ';border:none;border-radius:20px;font-family:var(--font);font-size:12px;font-weight:bold;cursor:pointer;flex-shrink:0;">' + c + '</button>';
+  });
+  bar.innerHTML = out;
+}
+
+function hlFilterCon(con) {
+  window._hlCon = con;
+  hlActiveBook = -1;
+  renderHLConBar();
+  renderHLTabs();
+  renderHLList();
+}
+
 function renderHLTabs() {
   var tabs = document.getElementById('hlTabs');
   if (!tabs) return;
-  var out = '<button class="hl-tab' + (hlActiveBook === -1 ? ' active' : '') + '" onclick="filterHL(-1)">전체</button>';
-  BOOKS.forEach(function(book) {
+  var con = window._hlCon || '전체';
+  var filtered = con === '전체' ? BOOKS : BOOKS.filter(function(b) { return _hlGetCon(b.title) === con; });
+  var out = '';
+  filtered.forEach(function(book) {
     var isActive = hlActiveBook === book.id;
     out += '<button class="hl-tab' + (isActive ? ' active' : '') + '" onclick="filterHL(' + book.id + ')">'
       + book.emo + ' ' + book.title.split(' ')[0]
@@ -4216,6 +4257,7 @@ function filterHL(bookId) {
 }
 
 function renderHL() {
+  renderHLConBar();
   renderHLTabs();
   renderHLList();
 }
@@ -4224,7 +4266,9 @@ function renderHLList() {
   var list = document.getElementById('hlList');
   if (!list) return;
   var out = '';
-  var booksToShow = hlActiveBook === -1 ? BOOKS : BOOKS.filter(function(b) { return b.id === hlActiveBook; });
+  var _con = window._hlCon || '전체';
+  var _cb = _con === '전체' ? BOOKS : BOOKS.filter(function(b) { return _hlGetCon(b.title) === _con; });
+  var booksToShow = hlActiveBook === -1 ? _cb : _cb.filter(function(b) { return b.id === hlActiveBook; });
   booksToShow.forEach(function(book) {
     out += '<div class="note-book-header">[' + book.emo + '] ' + book.title + '</div>';
     book.chapters.forEach(function(ch, idx) {
