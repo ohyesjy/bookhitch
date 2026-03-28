@@ -3785,8 +3785,8 @@ function renderShelf() {
   out += '<div style="display:flex;gap:4px;overflow-x:auto;padding:6px 0 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none">';
   activeCons.forEach(function(c) {
     var isActive = filter === c;
-    var bg = isActive ? 'var(--accent)' : 'rgba(61,8,20,0.06)';
-    var color = isActive ? '#E7F9A9' : 'var(--accent)';
+    var bg = isActive ? '#8B6040' : 'rgba(220,195,170,0.4)';
+    var color = isActive ? '#FFF5E6' : '#8B6040';
     var size = c === '전체' ? 'padding:5px 12px' : 'width:32px;height:32px;display:flex;align-items:center;justify-content:center';
     out += '<button onclick="filterShelf(\'' + c + '\')" style="' + size + ';background:' + bg + ';color:' + color + ';border:none;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:bold;cursor:pointer;flex-shrink:0">' + c + '</button>';
   });
@@ -3803,25 +3803,25 @@ function renderShelf() {
 
     // 카드
     out += '<div style="display:flex;align-items:center;gap:6px">';
-    out += '<button onclick="event.stopPropagation();shelfPrev()" style="width:32px;height:70px;background:none;border:1px solid rgba(61,8,20,0.12);border-radius:8px;font-size:16px;color:var(--accent);cursor:pointer;flex-shrink:0">◀</button>';
+    out += '<button onclick="event.stopPropagation();shelfPrev()" style="width:32px;height:70px;background:rgba(220,190,160,0.3);border:1px solid rgba(200,170,140,0.3);border-radius:10px;font-size:16px;color:#8B6040;cursor:pointer;flex-shrink:0">◀</button>';
 
-    out += '<div onclick="selectBook(' + bi + ')" style="flex:1;background:rgba(255,255,255,0.5);border:1px solid rgba(61,8,20,0.12);border-radius:14px;padding:16px;cursor:pointer;position:relative">';
+    out += '<div onclick="selectBook(' + bi + ')" style="flex:1;background:linear-gradient(135deg,rgba(245,228,210,0.85),rgba(240,220,195,0.7));border:1px solid rgba(200,170,140,0.25);border-radius:16px;padding:16px;cursor:pointer;position:relative;box-shadow:0 2px 12px rgba(180,140,100,0.1)">';
     out += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">';
     out += '<span style="font-size:28px">' + book.emo + '</span>';
-    out += '<div><div style="font-family:var(--font);font-size:14px;font-weight:bold;color:var(--accent)">' + book.title + '</div>';
-    out += '<div style="font-family:var(--font);font-size:10px;color:var(--green3);margin-top:2px">' + book.author + '</div></div></div>';
-    out += '<span style="font-size:9px;font-family:var(--mono);color:var(--green3);letter-spacing:1px">' + book.chapters.length + ' CHAPTERS</span>';
+    out += '<div><div style="font-family:var(--font);font-size:14px;font-weight:bold;color:#5A3020">' + book.title + '</div>';
+    out += '<div style="font-family:var(--font);font-size:10px;color:#A08060;margin-top:2px">' + book.author + '</div></div></div>';
+    out += '<span style="font-size:9px;font-family:var(--mono);color:#A08060;letter-spacing:1px">' + book.chapters.length + ' CHAPTERS</span>';
 
     if (book.coreLines && book.coreLines[0]) {
-      out += '<div style="margin-top:8px;padding:8px;background:rgba(61,8,20,0.04);border-radius:8px;font-family:var(--font);font-size:11px;color:#6A3040;line-height:1.5;font-style:italic">"' + book.coreLines[0] + '"</div>';
+      out += '<div style="margin-top:8px;padding:8px;background:rgba(255,245,230,0.6);border-radius:8px;font-family:var(--font);font-size:11px;color:#7A5040;line-height:1.5;font-style:italic">"' + book.coreLines[0] + '"</div>';
     }
 
     out += '<div style="margin-top:10px;display:flex;align-items:center;gap:8px">';
-    out += '<div style="flex:1;height:4px;background:rgba(61,8,20,0.1);border-radius:2px;overflow:hidden"><div style="width:' + prog.pct + '%;height:100%;background:var(--accent);border-radius:2px"></div></div>';
-    out += '<span style="font-family:var(--mono);font-size:10px;color:' + (prog.isDone ? 'var(--green3)' : 'var(--dim)') + '">' + prog.status + '</span></div>';
+    out += '<div style="flex:1;height:4px;background:rgba(180,150,120,0.2);border-radius:2px;overflow:hidden"><div style="width:' + prog.pct + '%;height:100%;background:linear-gradient(90deg,#C09070,#D4A880);border-radius:2px"></div></div>';
+    out += '<span style="font-family:var(--mono);font-size:10px;color:' + (prog.isDone ? '#6A9040' : '#B0906A') + '">' + prog.status + '</span></div>';
     out += '</div>';
 
-    out += '<button onclick="event.stopPropagation();shelfNext()" style="width:32px;height:70px;background:none;border:1px solid rgba(61,8,20,0.12);border-radius:8px;font-size:16px;color:var(--accent);cursor:pointer;flex-shrink:0">▶</button>';
+    out += '<button onclick="event.stopPropagation();shelfNext()" style="width:32px;height:70px;background:rgba(220,190,160,0.3);border:1px solid rgba(200,170,140,0.3);border-radius:10px;font-size:16px;color:#8B6040;cursor:pointer;flex-shrink:0">▶</button>';
     out += '</div>';
 
     // 카운터
