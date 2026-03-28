@@ -3785,8 +3785,8 @@ function renderShelf() {
   out += '<div style="display:flex;gap:4px;overflow-x:auto;padding:6px 0 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none">';
   activeCons.forEach(function(c) {
     var isActive = filter === c;
-    var bg = isActive ? '#4A6090' : 'rgba(70,90,140,0.1)';
-    var color = isActive ? '#F5F0E0' : '#4A6090';
+    var bg = isActive ? '#504840' : 'rgba(160,152,136,0.15)';
+    var color = isActive ? '#EDE8E0' : '#706860';
     var size = c === '전체' ? 'padding:5px 12px' : 'width:32px;height:32px;display:flex;align-items:center;justify-content:center';
     out += '<button onclick="filterShelf(\'' + c + '\')" style="' + size + ';background:' + bg + ';color:' + color + ';border:none;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:bold;cursor:pointer;flex-shrink:0">' + c + '</button>';
   });
@@ -3803,25 +3803,27 @@ function renderShelf() {
 
     // 카드
     out += '<div style="display:flex;align-items:center;gap:6px">';
-    out += '<button onclick="event.stopPropagation();shelfPrev()" style="width:32px;height:70px;background:rgba(70,90,140,0.15);border:1px solid rgba(70,90,140,0.2);border-radius:10px;font-size:16px;color:#4A6090;cursor:pointer;flex-shrink:0">◀</button>';
+    out += '<button onclick="event.stopPropagation();shelfPrev()" style="width:28px;height:60px;background:none;border:none;font-size:20px;color:#A09888;cursor:pointer;flex-shrink:0">◀</button>';
 
-    out += '<div onclick="selectBook(' + bi + ')" style="flex:1;background:linear-gradient(135deg,#F5F0E0,#EDE6D2);border:2px solid #4A6090;border-radius:16px;padding:16px;cursor:pointer;position:relative;box-shadow:0 3px 12px rgba(60,80,130,0.15)">';
+    out += '<div onclick="selectBook(' + bi + ')" style="flex:1;background:#EDE8E0;border:none;border-radius:3px;padding:16px 16px 16px 18px;cursor:pointer;position:relative;box-shadow:1px 2px 8px rgba(0,0,0,0.1),0 0 0 1px rgba(0,0,0,0.04);background-image:url(\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/><feColorMatrix type=%22saturate%22 values=%220%22/></filter><rect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22 opacity=%220.06%22/></svg>\');background-size:200px">';
+    // 클립 (오른쪽 상단)
+    out += '<svg width="24" height="50" viewBox="0 0 24 50" style="position:absolute;top:-12px;right:20px" fill="none"><path d="M12 0 L12 8 Q12 12 8 12 L8 38 Q8 46 16 46 L16 12 Q16 8 12 8" stroke="#888" stroke-width="1.8" fill="none"/></svg>';
     out += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">';
     out += '<span style="font-size:28px">' + book.emo + '</span>';
-    out += '<div><div style="font-family:var(--font);font-size:14px;font-weight:bold;color:#3A5080">' + book.title + '</div>';
-    out += '<div style="font-family:var(--font);font-size:10px;color:#8090A0;margin-top:2px">' + book.author + '</div></div></div>';
-    out += '<span style="font-size:9px;font-family:var(--mono);color:#6078A0;letter-spacing:1px">' + book.chapters.length + ' CHAPTERS</span>';
+    out += '<div><div style="font-family:var(--font);font-size:14px;font-weight:bold;color:#2A2520">' + book.title + '</div>';
+    out += '<div style="font-family:var(--font);font-size:10px;color:#8A8078;margin-top:2px">' + book.author + '</div></div></div>';
+    out += '<span style="font-size:9px;font-family:var(--mono);color:#8A8078;letter-spacing:1px">' + book.chapters.length + ' CHAPTERS</span>';
 
     if (book.coreLines && book.coreLines[0]) {
-      out += '<div style="margin-top:8px;padding:8px;background:rgba(70,90,140,0.08);border-left:3px solid #4A6090;border-radius:4px;font-family:var(--font);font-size:11px;color:#3A5080;line-height:1.5;font-style:italic">"' + book.coreLines[0] + '"</div>';
+      out += '<div style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.03);border-left:2px solid #A09888;border-radius:2px;font-family:var(--font);font-size:11px;color:#504840;line-height:1.5;font-style:italic">"' + book.coreLines[0] + '"</div>';
     }
 
     out += '<div style="margin-top:10px;display:flex;align-items:center;gap:8px">';
-    out += '<div style="flex:1;height:5px;background:rgba(70,90,140,0.12);border-radius:3px;overflow:hidden"><div style="width:' + prog.pct + '%;height:100%;background:linear-gradient(90deg,#4A6090,#6A8AC0);border-radius:3px"></div></div>';
-    out += '<span style="font-family:var(--mono);font-size:10px;color:' + (prog.isDone ? '#4A9050' : '#6078A0') + ';font-weight:bold">' + prog.status + '</span></div>';
+    out += '<div style="flex:1;height:4px;background:rgba(0,0,0,0.08);border-radius:2px;overflow:hidden"><div style="width:' + prog.pct + '%;height:100%;background:#8A8078;border-radius:2px"></div></div>';
+    out += '<span style="font-family:var(--mono);font-size:10px;color:' + (prog.isDone ? '#4A8050' : '#A09888') + ';font-weight:bold">' + prog.status + '</span></div>';
     out += '</div>';
 
-    out += '<button onclick="event.stopPropagation();shelfNext()" style="width:32px;height:70px;background:rgba(70,90,140,0.15);border:1px solid rgba(70,90,140,0.2);border-radius:10px;font-size:16px;color:#4A6090;cursor:pointer;flex-shrink:0">▶</button>';
+    out += '<button onclick="event.stopPropagation();shelfNext()" style="width:28px;height:60px;background:none;border:none;font-size:20px;color:#A09888;cursor:pointer;flex-shrink:0">▶</button>';
     out += '</div>';
 
     // 카운터
