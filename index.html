@@ -1320,76 +1320,6 @@ body { display:flex; justify-content:center; }
 <body>
 <div class="phone">
 
-<canvas id="globeCanvas" style="
-  position:absolute;
-  top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  width:100%; height:100%;
-  pointer-events:none;
-  z-index:0;
-  opacity:0.13;
-"></canvas>
-<script>
-(function(){
-  var c = document.getElementById('globeCanvas');
-  var phone = c.parentElement;
-  function resize(){
-    c.width  = phone.offsetWidth;
-    c.height = phone.offsetHeight;
-  }
-  resize();
-  var ctx = c.getContext('2d');
-  var t = 0;
-
-  function drawSketchEllipse(cx, cy, rx, ry, tilt, wobble){
-    ctx.beginPath();
-    var steps = 80;
-    for(var i=0;i<=steps;i++){
-      var a = (i/steps)*Math.PI*2;
-      var ex = Math.cos(a)*rx + (Math.random()-0.5)*wobble;
-      var ey = Math.sin(a)*ry + (Math.random()-0.5)*wobble*0.5;
-      var rx2 = ex*Math.cos(tilt) - ey*Math.sin(tilt);
-      var ry2 = ex*Math.sin(tilt) + ey*Math.cos(tilt);
-      if(i===0) ctx.moveTo(cx+rx2, cy+ry2);
-      else ctx.lineTo(cx+rx2, cy+ry2);
-    }
-    ctx.stroke();
-  }
-
-  function draw(){
-    ctx.clearRect(0,0,c.width,c.height);
-    var W = c.width, H = c.height;
-    var cx = W*0.5, cy = H*0.42;
-    var R  = Math.min(W,H)*0.28;
-
-    ctx.strokeStyle = '#2a3520';
-    ctx.lineWidth   = 1.3;
-    ctx.lineCap     = 'round';
-
-    // outer circle (main sphere)
-    drawSketchEllipse(cx, cy, R, R, 0, 0.6);
-
-    // horizontal orbit ring (tilted slightly, rotating)
-    var tiltH = 0.18 + Math.sin(t*0.4)*0.06;
-    drawSketchEllipse(cx, cy, R*1.08, R*0.28, tiltH, 0.5);
-
-    // vertical ring 1 (spinning around Y axis)
-    var spinA = t * 0.5;
-    var scaleX1 = Math.abs(Math.cos(spinA));
-    drawSketchEllipse(cx, cy, R*scaleX1, R, 0, 0.5);
-
-    // vertical ring 2 (offset spin)
-    var spinB = t * 0.5 + Math.PI*0.55;
-    var scaleX2 = Math.abs(Math.cos(spinB));
-    drawSketchEllipse(cx, cy, R*scaleX2, R, 0, 0.5);
-
-    t += 0.012;
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
-</script>
-
 <!-- HOME -->
 <div id="home" class="screen active">
   <div class="home-wrap">
@@ -1408,7 +1338,7 @@ body { display:flex; justify-content:center; }
     </div>
     <div class="sec fu3">// 🧠 오늘의 뇌자극 퀴즈</div>
     <div class="streak-wrap fu3" id="quizWrap" onclick="showNextQuiz()" style="cursor:pointer">
-      <div style="display:flex; gap:14px; align-items:center; padding:14px 0; border-bottom:1px solid var(--dimmer);">
+      <div style="display:flex; gap:14px; align-items:center; padding:14px 0; border-bottom:1px solid var(--dimmer); position:relative;">
         <div id="quizSketch" style="flex-shrink:0"></div>
         <div style="flex:1">
           <div id="quizQuestion" style="font-family:var(--font); font-size:13px; color:var(--accent); line-height:1.6; font-weight:bold;"></div>
@@ -1416,8 +1346,64 @@ body { display:flex; justify-content:center; }
           <div id="quizResult" style="margin-top:8px; font-family:var(--font); font-size:12px; display:none;"></div>
           <div style="margin-top:8px; font-size:9px; color:var(--green3); letter-spacing:1px;">TAP FOR NEXT QUIZ →</div>
         </div>
+        <!-- GLOBE animation -->
+        <div style="flex-shrink:0; width:80px; height:80px; position:relative;">
+          <canvas id="quizGlobe" width="80" height="80" style="display:block; opacity:0.55;"></canvas>
+        </div>
       </div>
     </div>
+<script>
+(function(){
+  var c = document.getElementById('quizGlobe');
+  if(!c) return;
+  var ctx = c.getContext('2d');
+  var t = 0;
+
+  function drawSketchEllipse(cx,cy,rx,ry,wobble){
+    ctx.beginPath();
+    var steps=60;
+    for(var i=0;i<=steps;i++){
+      var a=(i/steps)*Math.PI*2;
+      var x=cx+Math.cos(a)*rx+(Math.random()-0.5)*wobble;
+      var y=cy+Math.sin(a)*ry+(Math.random()-0.5)*wobble*0.4;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,80,80);
+    ctx.strokeStyle='#2a3a1a';
+    ctx.lineWidth=1.2;
+    ctx.lineCap='round';
+
+    var cx=40, cy=40, R=28;
+
+    // outer sphere
+    drawSketchEllipse(cx,cy,R,R,0.5);
+
+    // horizontal ring (tilted)
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.scale(1,0.28);
+    ctx.translate(-cx,-cy);
+    drawSketchEllipse(cx,cy,R*1.08,R*1.08,0.4);
+    ctx.restore();
+
+    // vertical ring 1 (spinning)
+    var sx1=Math.abs(Math.cos(t*0.55));
+    drawSketchEllipse(cx,cy,R*sx1,R,0.4);
+
+    // vertical ring 2 (offset)
+    var sx2=Math.abs(Math.cos(t*0.55+Math.PI*0.55));
+    drawSketchEllipse(cx,cy,R*sx2,R,0.4);
+
+    t+=0.014;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
     <div class="sec fu4">// 네 도서목록</div>
     <div class="shelf-wrap fu4">
       <div class="shelf-list" id="shelfList"></div>
