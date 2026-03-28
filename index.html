@@ -1339,18 +1339,7 @@ body { display:flex; justify-content:center; }
     </div>
     <div class="sec fu3">// 🧠 오늘의 뇌자극 퀴즈</div>
     <div class="streak-wrap fu3" id="quizWrap" onclick="showNextQuiz()" style="cursor:pointer">
-      <div style="display:flex; gap:16px; align-items:flex-start; padding:14px 0; border-bottom:1px solid var(--dimmer); position:relative;">
-        <div id="quizSketch" style="width:100%; text-align:center; margin-bottom:12px;"></div>
-        <div style="flex:1">
-          <div id="quizQuestion" style="font-family:var(--font); font-size:11px; color:var(--accent); line-height:1.4; font-weight:bold;"></div>
-          <div id="quizOptions" style="margin-top:6px;"></div>
-          <div id="quizResult" style="margin-top:5px; font-family:var(--font); font-size:12px; display:none;"></div>
-          <div style="margin-top:8px; font-size:11px; color:var(--green3); letter-spacing:1px;">TAP FOR NEXT QUIZ →</div>
-        </div>
-
-      </div>
-    </div>
-    <div class="sec fu4">// 네 도서목록</div>
+    <div class="streak-wrap fu3" id="quizWrap" onclick="showNextQuiz()" style="cursor:pointer"></div>
     <div class="shelf-wrap fu4">
       <div class="shelf-list" id="shelfList"></div>
     </div>
@@ -4012,8 +4001,7 @@ function showQuiz() {
   var resEl = document.getElementById('quizResult');
   if (!sketchEl || !qEl) return;
 
-  sketchEl.innerHTML = getQuizSketch(quiz.sketch);
-  resEl.style.display = 'none';
+  // sketch rendered via innerHTML below
 
   if (quiz.type === 'ox') {
     qEl.innerHTML = quiz.q + '<br><span style="font-weight:normal;font-size:12px;color:#6A3040;">"' + quiz.statement + '"</span>';
