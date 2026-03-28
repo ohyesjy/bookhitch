@@ -1346,21 +1346,21 @@ body { display:flex; justify-content:center; }
   var layer = document.getElementById('particleLayer');
   if (!layer) return;
   var stars = ['✦','✧','·','⋅','∗','°'];
-  var count = 25;
+  var count = 30;
   for (var i = 0; i < count; i++) {
     var el = document.createElement('div');
     el.className = 'particle';
     var isStar = Math.random() > 0.4;
     var symbol = isStar ? stars[Math.floor(Math.random()*3)] : stars[3+Math.floor(Math.random()*3)];
-    var size = isStar ? (8 + Math.random()*10) : (4 + Math.random()*6);
-    var opacity = isStar ? (0.25 + Math.random()*0.2) : (0.15 + Math.random()*0.15);
-    var duration = 18 + Math.random()*25;
+    var size = isStar ? (10 + Math.random()*14) : (5 + Math.random()*7);
+    var opacity = isStar ? (0.55 + Math.random()*0.3) : (0.4 + Math.random()*0.25);
+    var duration = 12 + Math.random()*18;
     var delay = Math.random()*15;
     var startX = Math.random()*100;
     var startY = 20 + Math.random()*80;
     var dx = -40 + Math.random()*80;
     var dy = -50 + Math.random()*-80;
-    var color = isStar ? 'rgba(90,80,40,' + opacity + ')' : 'rgba(60,50,30,' + opacity + ')';
+    var color = isStar ? 'rgba(30,100,30,' + opacity + ')' : 'rgba(10,80,50,' + opacity + ')';
     el.textContent = symbol;
     el.style.cssText = 'left:'+startX+'%;top:'+startY+'%;font-size:'+size+'px;color:'+color+';animation-duration:'+duration+'s;animation-delay:'+delay+'s;--po:'+opacity+';--dx:'+dx+'px;--dy:'+dy+'px;';
     layer.appendChild(el);
