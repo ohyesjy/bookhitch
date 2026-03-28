@@ -1402,6 +1402,7 @@ body { display:flex; justify-content:center; }
   <div class="hl-hd">
     <div class="hl-title">MY NOTES</div>
     <div class="hl-sub">질문과 내 답변 모음</div>
+    <div id="hlConsonantBar" style="display:flex;gap:4px;overflow-x:auto;padding:10px 20px 0;-webkit-overflow-scrolling:touch;scrollbar-width:none;"></div>
     <div class="hl-tabs" id="hlTabs"></div>
   </div>
   <div id="hlList"></div>
@@ -4177,11 +4178,55 @@ function loadCh(idx, tabEl) {
 
 var hlActiveBook = -1; // -1 = 전체
 
+// 자음 추출 (MY NOTES용)
+function getConsonantHL(str) {
+  var c = str.charCodeAt(0);
+  if (c >= 0xAC00 && c <= 0xD7A3) {
+    var idx = Math.floor((c - 0xAC00) / 588);
+    return ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'][idx] || 'etc';
+  }
+  if (/[a-zA-Z]/.test(str[0])) return 'A';
+  return 'etc';
+}
+function normConHL(c) { return {'ㄲ':'ㄱ','ㄸ':'ㄷ','ㅃ':'ㅂ','ㅆ':'ㅅ','ㅉ':'ㅈ'}[c] || c; }
+
+if (!window._hlConsonant) window._hlConsonant = '전체';
+
+function renderHLConsonantBar() {
+  var bar = document.getElementById('hlConsonantBar');
+  if (!bar) return;
+  var usedCons = {};
+  BOOKS.forEach(function(b) { usedCons[normConHL(getConsonantHL(b.title))] = true; });
+  var allCons = ['전체','ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','A'];
+  var active = allCons.filter(function(c) { return c === '전체' || usedCons[c]; });
+  var out = '';
+  active.forEach(function(c) {
+    var isA = window._hlConsonant === c;
+    var bg = isA ? '#504840' : 'rgba(160,152,136,0.15)';
+    var color = isA ? '#EDE8E0' : '#706860';
+    var size = c === '전체' ? 'padding:5px 12px' : 'width:32px;height:32px;display:flex;align-items:center;justify-content:center';
+    out += '<button onclick="filterHLCon('' + c + '')" style="' + size + ';background:' + bg + ';color:' + color + ';border:none;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:bold;cursor:pointer;flex-shrink:0">' + c + '</button>';
+  });
+  bar.innerHTML = out;
+}
+
+function filterHLCon(con) {
+  window._hlConsonant = con;
+  hlActiveBook = -1;
+  renderHLConsonantBar();
+  renderHLTabs();
+  renderHLList();
+}
+
 function renderHLTabs() {
   var tabs = document.getElementById('hlTabs');
   if (!tabs) return;
-  var out = '<button class="hl-tab' + (hlActiveBook === -1 ? ' active' : '') + '" onclick="filterHL(-1)">전체</button>';
-  BOOKS.forEach(function(book) {
+  var con = window._hlConsonant || '전체';
+  var filteredBooks = con === '전체' ? BOOKS : BOOKS.filter(function(b) {
+    return normConHL(getConsonantHL(b.title)) === con;
+  });
+  var out = '';
+  filteredBooks.forEach(function(book) {
     var isActive = hlActiveBook === book.id;
     out += '<button class="hl-tab' + (isActive ? ' active' : '') + '" onclick="filterHL(' + book.id + ')">'
       + book.emo + ' ' + book.title.split(' ')[0]
@@ -4197,6 +4242,7 @@ function filterHL(bookId) {
 }
 
 function renderHL() {
+  renderHLConsonantBar();
   renderHLTabs();
   renderHLList();
 }
@@ -4205,7 +4251,9 @@ function renderHLList() {
   var list = document.getElementById('hlList');
   if (!list) return;
   var out = '';
-  var booksToShow = hlActiveBook === -1 ? BOOKS : BOOKS.filter(function(b) { return b.id === hlActiveBook; });
+  var con = window._hlConsonant || '전체';
+  var conFiltered = con === '전체' ? BOOKS : BOOKS.filter(function(b) { return normConHL(getConsonantHL(b.title)) === con; });
+  var booksToShow = hlActiveBook === -1 ? conFiltered : conFiltered.filter(function(b) { return b.id === hlActiveBook; });
   booksToShow.forEach(function(book) {
     out += '<div class="note-book-header">[' + book.emo + '] ' + book.title + '</div>';
     book.chapters.forEach(function(ch, idx) {
