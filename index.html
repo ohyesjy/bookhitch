@@ -243,7 +243,7 @@ body { display:flex; justify-content:center; }
   transition: opacity 0.15s;
 }
 .shelf-add:active { opacity: 0.6; }
-.shelf-add-txt { font-size: 12px; color: var(--accent); letter-spacing: 2px; font-weight: 700; }
+.shelf-add-txt { font-size: 16px; color: var(--accent); letter-spacing: 2px; font-weight: 700; }
 
 .menu-wrap { padding: 0 20px; }
 .menu-item {
@@ -3856,7 +3856,7 @@ function renderShelf() {
     }, 50);
   }
 
-  out += '<div class="shelf-add" onclick="goAddBook()" style="margin-top:10px"><span class="shelf-idx" style="color:var(--accent); font-weight:700">[+]</span><div class="shelf-add-txt">ADD NEW BOOK</div></div>';
+  out += '<div class="shelf-add" onclick="goAddBook()" style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;"><div style="display:flex;align-items:center;gap:10px;"><span class="shelf-idx" style="color:var(--accent); font-weight:700">[+]</span><div class="shelf-add-txt">ADD NEW BOOK</div></div><span style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px;">사유 도서 생성기</span></div>';
   list.innerHTML = out;
 }
 
