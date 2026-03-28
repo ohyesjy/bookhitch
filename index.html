@@ -17,7 +17,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:     #F5F2EA;
+  --bg:     #F0C8A0;
   --bg2:    #D8F090;
   --accent: #3d0814;
   --accent2:#5A1020;
@@ -35,7 +35,7 @@
 }
 
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-html, body { height:100%; overflow:hidden; background:#F5F2EA; font-family:var(--font); }
+html, body { height:100%; overflow:hidden; background:#F0C8A0; font-family:var(--font); }
 body { display:flex; justify-content:center; }
 
 .phone {
@@ -1104,8 +1104,8 @@ body { display:flex; justify-content:center; }
 /* ══ NAV ══ */
 .nav {
   width: 100%; position: sticky; bottom: 0; z-index: 100;
-  background: #5B6BAA;
-  border-top: 1px solid rgba(70,80,140,0.3);
+  background: var(--bg);
+  border-top: 1.5px solid #1A1A1A;
   display: flex; flex-shrink: 0;
   justify-content: center;
   gap: 0;
@@ -1120,10 +1120,10 @@ body { display:flex; justify-content:center; }
   transition: opacity 0.15s; font-family: var(--font);
 }
 .n-btn:active { opacity: 0.5; }
-.n-ico { font-size: 15px; color: rgba(255,240,220,0.7); transition: color 0.2s; }
-.n-lbl { font-size: 8px; color: rgba(255,240,220,0.7); letter-spacing: 1.5px; text-transform: uppercase; transition: color 0.2s; }
-.n-btn.active .n-ico { color: #FFF5E0; text-shadow: none; }
-.n-btn.active .n-lbl { color: #FFF5E0; }
+.n-ico { font-size: 15px; color: #1A1A1A; transition: color 0.2s; }
+.n-lbl { font-size: 8px; color: #1A1A1A; letter-spacing: 1.5px; text-transform: uppercase; transition: color 0.2s; }
+.n-btn.active .n-ico { color: #1A1A1A; font-weight: bold; text-shadow: none; }
+.n-btn.active .n-lbl { color: #1A1A1A; font-weight: bold; }
 
 /* ══ TOAST ══ */
 .toast {
