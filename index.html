@@ -1345,24 +1345,36 @@ body { display:flex; justify-content:center; }
 (function(){
   var layer = document.getElementById('particleLayer');
   if (!layer) return;
-  var stars = ['✦','✧','·','⋅','∗','°'];
-  var count = 30;
+  var count = 45;
   for (var i = 0; i < count; i++) {
     var el = document.createElement('div');
     el.className = 'particle';
-    var isStar = Math.random() > 0.4;
-    var symbol = isStar ? stars[Math.floor(Math.random()*3)] : stars[3+Math.floor(Math.random()*3)];
-    var size = isStar ? (10 + Math.random()*14) : (5 + Math.random()*7);
-    var opacity = isStar ? (0.55 + Math.random()*0.3) : (0.4 + Math.random()*0.25);
-    var duration = 12 + Math.random()*18;
-    var delay = Math.random()*15;
-    var startX = Math.random()*100;
-    var startY = 20 + Math.random()*80;
-    var dx = -40 + Math.random()*80;
-    var dy = -50 + Math.random()*-80;
-    var color = isStar ? 'rgba(30,100,30,' + opacity + ')' : 'rgba(10,80,50,' + opacity + ')';
-    el.textContent = symbol;
-    el.style.cssText = 'left:'+startX+'%;top:'+startY+'%;font-size:'+size+'px;color:'+color+';animation-duration:'+duration+'s;animation-delay:'+delay+'s;--po:'+opacity+';--dx:'+dx+'px;--dy:'+dy+'px;';
+    var isLarge = Math.random() > 0.75;
+    var isMed   = !isLarge && Math.random() > 0.5;
+    var size    = isLarge ? (10 + Math.random()*8)
+                : isMed   ? (4  + Math.random()*4)
+                :            (1  + Math.random()*2);
+    var opacity = isLarge ? (0.45 + Math.random()*0.3)
+                : isMed   ? (0.3  + Math.random()*0.25)
+                :            (0.2  + Math.random()*0.2);
+    var duration = isLarge ? (22 + Math.random()*18)
+                 : isMed   ? (16 + Math.random()*14)
+                 :            (12 + Math.random()*10);
+    var delay   = Math.random() * 20;
+    var startX  = -5 + Math.random() * 30;
+    var startY  = Math.random() * 100;
+    var dx      = 110 + Math.random() * 60;
+    var dy      = -8  + Math.random() * 16;
+    var r = 30 + Math.floor(Math.random()*40);
+    var g = 90 + Math.floor(Math.random()*40);
+    var b = 30 + Math.floor(Math.random()*30);
+    el.style.cssText =
+      'left:'+startX+'%;top:'+startY+'%;'+
+      'width:'+size+'px;height:'+size+'px;'+
+      'background:rgba('+r+','+g+','+b+','+opacity+');'+
+      'animation-duration:'+duration+'s;'+
+      'animation-delay:-'+delay+'s;'+
+      '--po:'+opacity+';--dx:'+dx+'px;--dy:'+dy+'px;';
     layer.appendChild(el);
   }
 })();
