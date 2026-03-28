@@ -35,6 +35,7 @@
 }
 
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html { font-size: 110%; }
 html, body { height:100%; overflow:hidden; background:#E7F9A9; font-family:var(--font); }
 body { display:flex; justify-content:center; }
 
@@ -1342,7 +1343,7 @@ body { display:flex; justify-content:center; }
       <div style="display:flex; gap:14px; align-items:center; padding:5px 0; border-bottom:1px solid var(--dimmer); position:relative;">
         <div id="quizSketch" style="flex-shrink:0"></div>
         <div style="flex:1">
-          <div id="quizQuestion" style="font-family:var(--font); font-size:14px; color:var(--accent); line-height:1.5; font-weight:bold;"></div>
+          <div id="quizQuestion" style="font-family:var(--font); font-size:11px; color:var(--accent); line-height:1.4; font-weight:bold;"></div>
           <div id="quizOptions" style="margin-top:6px;"></div>
           <div id="quizResult" style="margin-top:5px; font-family:var(--font); font-size:12px; display:none;"></div>
           <div style="margin-top:5px; font-size:9px; color:var(--green3); letter-spacing:1px;">TAP FOR NEXT QUIZ →</div>
@@ -4016,14 +4017,14 @@ function showQuiz() {
   resEl.style.display = 'none';
 
   if (quiz.type === 'ox') {
-    qEl.innerHTML = quiz.q + '<br><span style="font-weight:normal;font-size:13px;color:#6A3040;">"' + quiz.statement + '"</span>';
+    qEl.innerHTML = quiz.q + '<br><span style="font-weight:normal;font-size:12px;color:#6A3040;">"' + quiz.statement + '"</span>';
     optEl.innerHTML = '<button onclick="event.stopPropagation();answerQuiz(true)" style="padding:7px 20px;margin-right:8px;background:#5A7A20;color:#E7F9A9;border:none;border-radius:20px;font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;letter-spacing:1px;">O 맞아</button>'
       + '<button onclick="event.stopPropagation();answerQuiz(false)" style="padding:7px 20px;background:#7A3030;color:#F9E8E8;border:none;border-radius:20px;font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;letter-spacing:1px;">X 아니야</button>';
   } else if (quiz.type === 'word') {
     qEl.innerHTML = quiz.q;
     optEl.innerHTML = '<button onclick="event.stopPropagation();revealAnswer()" style="padding:6px 16px;background:var(--accent);color:#E7F9A9;border:none;border-radius:6px;font-family:var(--mono);font-size:11px;cursor:pointer">🤔 정답 보기</button>';
   } else {
-    qEl.innerHTML = quiz.q + '<br><span style="font-weight:normal;font-size:13px;color:#6A3040;">' + quiz.hint + '</span>';
+    qEl.innerHTML = quiz.q + '<br><span style="font-weight:normal;font-size:11px;color:#6A3040;">' + quiz.hint + '</span>';
     optEl.innerHTML = '<button onclick="event.stopPropagation();revealAnswer()" style="padding:6px 16px;background:var(--accent);color:#E7F9A9;border:none;border-radius:6px;font-family:var(--mono);font-size:11px;cursor:pointer">💡 정답 확인</button>';
   }
 }
