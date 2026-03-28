@@ -1320,6 +1320,52 @@ body { display:flex; justify-content:center; }
 <body>
 <div class="phone">
 
+<style>
+.particles {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.ptc {
+  position: absolute;
+  opacity: 0;
+  animation: ptcFloat linear infinite;
+}
+@keyframes ptcFloat {
+  0% { opacity: 0; transform: translate(0,0) scale(0.5); }
+  15% { opacity: var(--po); transform: translate(calc(var(--dx)*0.15), calc(var(--dy)*0.15)) scale(1); }
+  85% { opacity: var(--po); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.3); }
+}
+</style>
+<div class="particles" id="ptcLayer"></div>
+<script>
+(function(){
+  var L = document.getElementById('ptcLayer');
+  if (!L) return;
+  var syms = ['✦','✧','∗','·','⋅','°','✶','⊹'];
+  for (var i = 0; i < 30; i++) {
+    var el = document.createElement('div');
+    el.className = 'ptc';
+    var isStar = i < 12;
+    var s = isStar ? syms[Math.floor(Math.random()*4)] : syms[4+Math.floor(Math.random()*4)];
+    var sz = isStar ? (10+Math.random()*12) : (4+Math.random()*6);
+    var op = isStar ? (0.18+Math.random()*0.15) : (0.12+Math.random()*0.1);
+    var dur = 15+Math.random()*25;
+    var del = Math.random()*20;
+    var x = Math.random()*100;
+    var y = Math.random()*100;
+    var dx = (-30+Math.random()*60);
+    var dy = (-60+Math.random()*-40);
+    el.textContent = s;
+    el.style.cssText = 'left:'+x+'%;top:'+y+'%;font-size:'+sz+'px;color:rgba(80,70,40,'+op+');animation-duration:'+dur+'s;animation-delay:'+del+'s;--po:'+op+';--dx:'+dx+'px;--dy:'+dy+'px;';
+    L.appendChild(el);
+  }
+})();
+</script>
+
 <!-- HOME -->
 <div id="home" class="screen active">
     <div class="home-wrap">
