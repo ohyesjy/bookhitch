@@ -1347,8 +1347,8 @@ body { display:flex; justify-content:center; }
           <div style="margin-top:8px; font-size:9px; color:var(--green3); letter-spacing:1px;">TAP FOR NEXT QUIZ →</div>
         </div>
         <!-- GLOBE animation -->
-        <div style="flex-shrink:0; width:80px; height:80px; position:relative;">
-          <canvas id="quizGlobe" width="80" height="80" style="display:block; opacity:0.55;"></canvas>
+        <div style="flex-shrink:0; width:96px; height:96px; position:relative;">
+          <canvas id="quizGlobe" width="96" height="96" style="display:block; opacity:0.7;"></canvas>
         </div>
       </div>
     </div>
@@ -1357,48 +1357,53 @@ body { display:flex; justify-content:center; }
   var c = document.getElementById('quizGlobe');
   if(!c) return;
   var ctx = c.getContext('2d');
+  var S = 96;
   var t = 0;
+  var R = 36;
+  var numPts = 320;
 
-  function drawSketchEllipse(cx,cy,rx,ry,wobble){
-    ctx.beginPath();
-    var steps=60;
-    for(var i=0;i<=steps;i++){
-      var a=(i/steps)*Math.PI*2;
-      var x=cx+Math.cos(a)*rx+(Math.random()-0.5)*wobble;
-      var y=cy+Math.sin(a)*ry+(Math.random()-0.5)*wobble*0.4;
-      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    }
-    ctx.stroke();
+  // Generate sphere points (fibonacci lattice)
+  var pts = [];
+  var golden = Math.PI * (3 - Math.sqrt(5));
+  for(var i=0;i<numPts;i++){
+    var y = 1 - (i/(numPts-1))*2;
+    var r = Math.sqrt(1 - y*y);
+    var theta = golden * i;
+    pts.push([Math.cos(theta)*r, y, Math.sin(theta)*r]);
   }
 
   function draw(){
-    ctx.clearRect(0,0,80,80);
-    ctx.strokeStyle='#2a3a1a';
-    ctx.lineWidth=1.2;
-    ctx.lineCap='round';
+    ctx.clearRect(0,0,S,S);
+    var cosT = Math.cos(t*0.4);
+    var sinT = Math.sin(t*0.4);
 
-    var cx=40, cy=40, R=28;
+    for(var i=0;i<pts.length;i++){
+      var px = pts[i][0];
+      var py = pts[i][1];
+      var pz = pts[i][2];
 
-    // outer sphere
-    drawSketchEllipse(cx,cy,R,R,0.5);
+      // rotate around Y axis
+      var rx = px*cosT + pz*sinT;
+      var rz = -px*sinT + pz*cosT;
+      var ry = py;
 
-    // horizontal ring (tilted)
-    ctx.save();
-    ctx.translate(cx,cy);
-    ctx.scale(1,0.28);
-    ctx.translate(-cx,-cy);
-    drawSketchEllipse(cx,cy,R*1.08,R*1.08,0.4);
-    ctx.restore();
+      // project
+      var scale = (rz + 2) / 3;
+      var sx = S/2 + rx*R*scale;
+      var sy = S/2 + ry*R*scale;
 
-    // vertical ring 1 (spinning)
-    var sx1=Math.abs(Math.cos(t*0.55));
-    drawSketchEllipse(cx,cy,R*sx1,R,0.4);
+      // depth-based size and opacity
+      var depth = (rz + 1) / 2;
+      var size  = 0.5 + depth*1.2;
+      var alpha = 0.15 + depth*0.65;
 
-    // vertical ring 2 (offset)
-    var sx2=Math.abs(Math.cos(t*0.55+Math.PI*0.55));
-    drawSketchEllipse(cx,cy,R*sx2,R,0.4);
+      ctx.beginPath();
+      ctx.arc(sx, sy, size, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(40,55,25,' + alpha.toFixed(2) + ')';
+      ctx.fill();
+    }
 
-    t+=0.014;
+    t += 0.014;
     requestAnimationFrame(draw);
   }
   draw();
