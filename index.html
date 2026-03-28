@@ -3742,41 +3742,87 @@ function getBookProgress(bookIdx) {
 function renderShelf() {
   var list = document.getElementById('shelfList');
   if (!list) return;
-  var staticBooks = [];
-  var out = '';
+
+  // 한글 자음 추출 함수
+  function getConsonant(str) {
+    var c = str.charCodeAt(0);
+    if (c >= 0xAC00 && c <= 0xD7A3) {
+      var idx = Math.floor((c - 0xAC00) / 588);
+      return ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'][idx] || 'etc';
+    }
+    if (/[a-zA-Z]/.test(str[0])) return 'ABC';
+    if (/[0-9]/.test(str[0])) return '0-9';
+    return 'etc';
+  }
+
+  // 쌍자음을 기본 자음으로 합치기
+  function normalizeConsonant(c) {
+    var map = {'ㄲ':'ㄱ','ㄸ':'ㄷ','ㅃ':'ㅂ','ㅆ':'ㅅ','ㅉ':'ㅈ'};
+    return map[c] || c;
+  }
+
+  // 자음별로 그룹핑
+  var groups = {};
   BOOKS.forEach(function(book, i) {
-    var prog = getBookProgress(i);
-    var isDone = prog.isDone;
-    var statusColor = isDone ? 'var(--green3)' : '';
-    var fillOpacity = isDone ? ';opacity:0.35' : '';
-    var delBtn = (i >= 11 && !book._builtin) ? '<button onclick="event.stopPropagation();deleteCustomBook(' + i + ')" style="background:none;border:none;color:#C04040;font-size:11px;padding:4px 8px;font-family:var(--mono);cursor:pointer">✕</button>' : '';
-    out += '<div class="shelf-item" onclick="selectBook(' + i + ')">'
-      + '<span class="shelf-idx">[' + i + ']</span>'
-      + '<span class="shelf-emo">' + book.emo + '</span>'
-      + '<div class="shelf-info">'
-      + '<div class="shelf-ttl">' + book.title + '</div>'
-      + '<div class="shelf-auth">' + book.author + '</div>'
-      + '</div>'
-      + '<div class="shelf-bar"><div class="shelf-bar-fill" style="width:' + prog.pct + '%' + fillOpacity + '"></div></div>'
-      + '<div class="shelf-status"' + (statusColor ? ' style="color:' + statusColor + '"' : '') + '>' + prog.status + '</div>'
-      + delBtn
-      + '</div>';
+    var con = normalizeConsonant(getConsonant(book.title));
+    if (!groups[con]) groups[con] = [];
+    groups[con].push({ book: book, idx: i });
   });
-  staticBooks.forEach(function(b, i) {
-    var si = BOOKS.length + i;
-    out += '<div class="shelf-item" onclick="showToast(\'' + b.title + '\')">'
-      + '<span class="shelf-idx">[' + si + ']</span>'
-      + '<span class="shelf-emo">' + b.emo + '</span>'
-      + '<div class="shelf-info">'
-      + '<div class="shelf-ttl">' + b.title + '</div>'
-      + '<div class="shelf-auth">' + b.auth + '</div>'
-      + '</div>'
-      + '<div class="shelf-bar"><div class="shelf-bar-fill" style="width:' + b.prog + '%"></div></div>'
-      + '<div class="shelf-status"' + (b.statusColor ? ' style="color:' + b.statusColor + '"' : '') + '>' + b.status + '</div>'
-      + '</div>';
+
+  // 자음 정렬 순서
+  var order = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','ABC','0-9','etc'];
+  var sortedKeys = Object.keys(groups).sort(function(a,b) {
+    return order.indexOf(a) - order.indexOf(b);
   });
+
+  // 펼침 상태 관리
+  if (!window._shelfOpen) window._shelfOpen = {};
+
+  var out = '';
+  sortedKeys.forEach(function(con) {
+    var items = groups[con];
+    var isOpen = window._shelfOpen[con];
+    var count = items.length;
+
+    // 자음 헤더 (탭하면 펼침/접힘)
+    out += '<div onclick="toggleShelfGroup(\'' + con + '\')" style="display:flex;align-items:center;gap:8px;padding:10px 0;cursor:pointer;border-bottom:1px solid rgba(61,8,20,0.08)">'
+      + '<span style="font-family:var(--vt);font-size:22px;color:var(--accent);width:36px;text-align:center">' + con + '</span>'
+      + '<span style="font-family:var(--mono);font-size:10px;color:var(--green3);letter-spacing:1px">' + count + '권</span>'
+      + '<span style="margin-left:auto;font-size:12px;color:var(--dim)">' + (isOpen ? '▼' : '▶') + '</span>'
+      + '</div>';
+
+    // 책 목록 (펼쳐진 경우만)
+    if (isOpen) {
+      items.forEach(function(item) {
+        var book = item.book;
+        var i = item.idx;
+        var prog = getBookProgress(i);
+        var isDone = prog.isDone;
+        var statusColor = isDone ? 'var(--green3)' : '';
+        var fillOpacity = isDone ? ';opacity:0.35' : '';
+        var delBtn = (i >= 11 && !book._builtin) ? '<button onclick="event.stopPropagation();deleteCustomBook(' + i + ')" style="background:none;border:none;color:#C04040;font-size:11px;padding:4px 8px;font-family:var(--mono);cursor:pointer">✕</button>' : '';
+        out += '<div class="shelf-item" onclick="selectBook(' + i + ')" style="padding-left:20px">'
+          + '<span class="shelf-emo">' + book.emo + '</span>'
+          + '<div class="shelf-info">'
+          + '<div class="shelf-ttl">' + book.title + '</div>'
+          + '<div class="shelf-auth">' + book.author + '</div>'
+          + '</div>'
+          + '<div class="shelf-bar"><div class="shelf-bar-fill" style="width:' + prog.pct + '%' + fillOpacity + '"></div></div>'
+          + '<div class="shelf-status"' + (statusColor ? ' style="color:' + statusColor + '"' : '') + '>' + prog.status + '</div>'
+          + delBtn
+          + '</div>';
+      });
+    }
+  });
+
   out += '<div class="shelf-add" onclick="goAddBook()"><span class="shelf-idx" style="color:var(--dim)">[+]</span><span class="shelf-emo" style="opacity:0.3">📚</span><div class="shelf-add-txt">ADD NEW BOOK</div></div>';
   list.innerHTML = out;
+}
+
+function toggleShelfGroup(con) {
+  if (!window._shelfOpen) window._shelfOpen = {};
+  window._shelfOpen[con] = !window._shelfOpen[con];
+  renderShelf();
 }
 
 function renderToday() {
