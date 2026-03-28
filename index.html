@@ -1319,6 +1319,54 @@ body { display:flex; justify-content:center; }
 </head>
 <body>
 <div class="phone">
+<div class="particles" id="particleLayer"></div>
+
+<style>
+.particles {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  opacity: 0;
+  animation: floatParticle linear infinite;
+}
+@keyframes floatParticle {
+  0% { opacity: 0; transform: translateY(0) translateX(0) rotate(0deg); }
+  10% { opacity: var(--po); }
+  90% { opacity: var(--po); }
+  100% { opacity: 0; transform: translateY(var(--dy)) translateX(var(--dx)) rotate(360deg); }
+}
+</style>
+<script>
+(function(){
+  var layer = document.getElementById('particleLayer');
+  if (!layer) return;
+  var stars = ['✦','✧','·','⋅','∗','°'];
+  var count = 18;
+  for (var i = 0; i < count; i++) {
+    var el = document.createElement('div');
+    el.className = 'particle';
+    var isStar = Math.random() > 0.5;
+    var symbol = isStar ? stars[Math.floor(Math.random()*3)] : stars[3+Math.floor(Math.random()*3)];
+    var size = isStar ? (6 + Math.random()*6) : (3 + Math.random()*4);
+    var opacity = isStar ? (0.08 + Math.random()*0.08) : (0.06 + Math.random()*0.06);
+    var duration = 20 + Math.random()*30;
+    var delay = Math.random()*25;
+    var startX = Math.random()*100;
+    var startY = Math.random()*100;
+    var dx = -30 + Math.random()*60;
+    var dy = -40 + Math.random()*-60;
+    var color = isStar ? 'rgba(120,100,60,' + opacity + ')' : 'rgba(80,70,50,' + opacity + ')';
+    el.textContent = symbol;
+    el.style.cssText = 'left:'+startX+'%;top:'+startY+'%;font-size:'+size+'px;color:'+color+';animation-duration:'+duration+'s;animation-delay:'+delay+'s;--po:'+opacity+';--dx:'+dx+'px;--dy:'+dy+'px;';
+    layer.appendChild(el);
+  }
+})();
+</script>
 
 <!-- HOME -->
 <div id="home" class="screen active">
