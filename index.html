@@ -4003,6 +4003,35 @@ function renderChTabs(activeIdx) {
   loadCh(activeIdx, tabs.querySelectorAll('.ch-tab')[activeIdx]);
 }
 
+// ══ 챕터 앞/뒤 이동 버튼 ══
+function buildChNavButtons(idx) {
+  var total = CHS.length;
+  var prevBtn = idx > 0
+    ? '<button onclick="goChPrev()" style="flex:1;padding:16px;background:var(--accent);color:#E7F9A9;border:none;border-radius:10px;font-family:var(--mono);font-size:13px;letter-spacing:1px;cursor:pointer">◀ 이전 챕터</button>'
+    : '<div style="flex:1"></div>';
+  var nextBtn = idx < total - 1
+    ? '<button onclick="goChNext()" style="flex:1;padding:16px;background:var(--accent);color:#E7F9A9;border:none;border-radius:10px;font-family:var(--mono);font-size:13px;letter-spacing:1px;cursor:pointer">다음 챕터 ▶</button>'
+    : '<div style="flex:1"></div>';
+  var counter = '<div style="font-family:var(--mono);font-size:10px;color:var(--green3);text-align:center;margin-bottom:6px">' + (idx+1) + ' / ' + total + '</div>';
+  return '<div style="padding:20px 0 10px">' + counter + '<div style="display:flex;gap:10px">' + prevBtn + nextBtn + '</div></div>';
+}
+
+function goChPrev() {
+  if (curChIdx > 0) {
+    var newIdx = curChIdx - 1;
+    var tabs = document.querySelectorAll('.ch-tab');
+    loadCh(newIdx, tabs[newIdx] || null);
+  }
+}
+
+function goChNext() {
+  if (curChIdx < CHS.length - 1) {
+    var newIdx = curChIdx + 1;
+    var tabs = document.querySelectorAll('.ch-tab');
+    loadCh(newIdx, tabs[newIdx] || null);
+  }
+}
+
 function loadCh(idx, tabEl) {
   curChIdx = idx;
   CHS = BOOKS[curBookIdx].chapters;
@@ -4044,6 +4073,7 @@ function loadCh(idx, tabEl) {
     (ch.isLast ? buildEmotionHTML() : '') +
     (ch.isLast ? buildBigQHTML(idx) : '') +
     (ch.isLast ? buildEndingHTML(idx) : '') +
+    buildChNavButtons(idx) +
     `<div style="height:10px"></div>`;
 
   // 챕터 전환 시 스크롤 최상단 복귀
