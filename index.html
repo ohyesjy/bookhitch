@@ -1325,8 +1325,8 @@ body { display:flex; justify-content:center; }
   <!-- WAVY LINE RIGHT SIDE -->
   <canvas id="wavyLine" style="
     position:absolute;
-    top:0; right:8px;
-    width:40px; height:100%;
+    top:5%; right:8px;
+    width:40px; height:60%;
     pointer-events:none;
     z-index:0;
     opacity:0.45;
@@ -1397,69 +1397,9 @@ body { display:flex; justify-content:center; }
           <div id="quizResult" style="margin-top:8px; font-family:var(--font); font-size:12px; display:none;"></div>
           <div style="margin-top:8px; font-size:9px; color:var(--green3); letter-spacing:1px;">TAP FOR NEXT QUIZ →</div>
         </div>
-        <!-- GLOBE animation -->
-        <div style="flex-shrink:0; width:96px; height:96px; position:relative;">
-          <canvas id="quizGlobe" width="96" height="96" style="display:block; opacity:0.7;"></canvas>
-        </div>
+
       </div>
     </div>
-<script>
-(function(){
-  var c = document.getElementById('quizGlobe');
-  if(!c) return;
-  var ctx = c.getContext('2d');
-  var S = 96;
-  var t = 0;
-  var R = 36;
-  var numPts = 320;
-
-  // Generate sphere points (fibonacci lattice)
-  var pts = [];
-  var golden = Math.PI * (3 - Math.sqrt(5));
-  for(var i=0;i<numPts;i++){
-    var y = 1 - (i/(numPts-1))*2;
-    var r = Math.sqrt(1 - y*y);
-    var theta = golden * i;
-    pts.push([Math.cos(theta)*r, y, Math.sin(theta)*r]);
-  }
-
-  function draw(){
-    ctx.clearRect(0,0,S,S);
-    var cosT = Math.cos(t*0.4);
-    var sinT = Math.sin(t*0.4);
-
-    for(var i=0;i<pts.length;i++){
-      var px = pts[i][0];
-      var py = pts[i][1];
-      var pz = pts[i][2];
-
-      // rotate around Y axis
-      var rx = px*cosT + pz*sinT;
-      var rz = -px*sinT + pz*cosT;
-      var ry = py;
-
-      // project
-      var scale = (rz + 2) / 3;
-      var sx = S/2 + rx*R*scale;
-      var sy = S/2 + ry*R*scale;
-
-      // depth-based size and opacity
-      var depth = (rz + 1) / 2;
-      var size  = 0.5 + depth*1.2;
-      var alpha = 0.15 + depth*0.65;
-
-      ctx.beginPath();
-      ctx.arc(sx, sy, size, 0, Math.PI*2);
-      ctx.fillStyle = 'rgba(40,55,25,' + alpha.toFixed(2) + ')';
-      ctx.fill();
-    }
-
-    t += 0.014;
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
-</script>
     <div class="sec fu4">// 네 도서목록</div>
     <div class="shelf-wrap fu4">
       <div class="shelf-list" id="shelfList"></div>
