@@ -1336,12 +1336,8 @@ body { display:flex; justify-content:center; }
         <div class="today-arrow">ENTER TO READ ▌</div>
       </div>
     </div>
-    <div class="sec">// 네 도서목록</div>
-    <div class="shelf-wrap">
-      <div class="shelf-list" id="shelfList"></div>
-    </div>
-    <div class="sec">// 🧠 오늘의 뇌자극 퀴즈</div>
-    <div class="streak-wrap" id="quizWrap" onclick="showNextQuiz()" style="cursor:pointer">
+    <div class="sec fu3">// 🧠 오늘의 뇌자극 퀴즈</div>
+    <div class="streak-wrap fu3" id="quizWrap" onclick="showNextQuiz()" style="cursor:pointer">
       <div style="display:flex; gap:14px; align-items:center; padding:5px 0; border-bottom:1px solid var(--dimmer); position:relative;">
         <div id="quizSketch" style="flex-shrink:0"></div>
         <div style="flex:1">
@@ -1352,6 +1348,10 @@ body { display:flex; justify-content:center; }
         </div>
 
       </div>
+    </div>
+    <div class="sec fu4">// 네 도서목록</div>
+    <div class="shelf-wrap fu4">
+      <div class="shelf-list" id="shelfList"></div>
     </div>
     <div class="sec">// MENU</div>
     <div class="menu-wrap">
@@ -1402,7 +1402,6 @@ body { display:flex; justify-content:center; }
   <div class="hl-hd">
     <div class="hl-title">MY NOTES</div>
     <div class="hl-sub">질문과 내 답변 모음</div>
-    <div id="hlConsonantBar" style="display:flex;gap:4px;overflow-x:auto;padding:10px 20px 0;-webkit-overflow-scrolling:touch;scrollbar-width:none;"></div>
     <div class="hl-tabs" id="hlTabs"></div>
   </div>
   <div id="hlList"></div>
@@ -1470,24 +1469,6 @@ body { display:flex; justify-content:center; }
   <div class="srch-res" id="srchRes"></div>
 </div>
 
-<!-- Brain line art decoration -->
-<div style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:10;pointer-events:none;opacity:0.12;">
-  <svg width="90" height="70" viewBox="0 0 120 95" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M28 72 C20 72 12 66 10 57 C8 50 11 43 17 39 C14 35 13 29 16 24 C19 18 26 15 33 16 C35 10 42 6 50 7 C56 4 63 5 68 9 C74 5 82 5 88 10 C95 8 103 12 106 20 C110 18 114 21 115 26 C118 30 116 36 112 39 C116 44 116 51 113 56 C110 63 103 67 96 66 C93 72 86 76 79 75 C74 80 66 82 59 80 C53 84 45 83 40 79 C36 79 30 76 28 72Z" stroke="#2A0510" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-    <path d="M33 16 C33 22 30 27 28 32 C26 37 27 43 30 47" stroke="#2A0510" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-    <path d="M50 7 C48 13 45 18 44 24 C43 30 45 36 49 40" stroke="#2A0510" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-    <path d="M68 9 C67 15 66 21 67 27 C68 33 71 38 74 42" stroke="#2A0510" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-    <path d="M88 10 C87 16 88 22 90 28 C92 34 93 40 91 46" stroke="#2A0510" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-    <path d="M17 39 C23 38 30 40 35 44 C40 48 42 54 40 60" stroke="#2A0510" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-    <path d="M112 39 C106 40 99 42 95 47 C91 52 91 59 94 64" stroke="#2A0510" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-    <path d="M44 24 C50 23 57 22 63 24 C69 26 74 31 74 37" stroke="#2A0510" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-    <path d="M30 47 C37 46 45 48 51 52 C57 56 59 63 57 69" stroke="#2A0510" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-    <path d="M74 42 C80 43 86 46 89 52 C92 57 90 64 86 68" stroke="#2A0510" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-    <path d="M57 69 C57 75 57 80 59 80" stroke="#2A0510" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-    <path d="M54 80 C51 86 49 90 50 93" stroke="#2A0510" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-    <path d="M59 80 C61 86 60 90 59 93" stroke="#2A0510" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-  </svg>
-</div>
 <!-- NAV -->
 <div class="nav">
   <button class="n-btn" id="nav-reader" onclick="goReader()">
@@ -3785,7 +3766,7 @@ function renderShelf() {
   function normCon(c) { return {'ㄲ':'ㄱ','ㄸ':'ㄷ','ㅃ':'ㅂ','ㅆ':'ㅅ','ㅉ':'ㅈ'}[c] || c; }
 
   // 현재 필터
-  if (!window._shelfFilter) window._shelfFilter = '전체'; // 전체 허용
+  if (!window._shelfFilter) window._shelfFilter = '전체';
   var filter = window._shelfFilter;
 
   // 필터된 책 목록
@@ -3805,21 +3786,10 @@ function renderShelf() {
   // 사용 중인 자음 목록
   var usedCons = {};
   BOOKS.forEach(function(b) { usedCons[normCon(getConsonant(b.title))] = true; });
-  var allCons = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','A'];
-  var activeCons = allCons.filter(function(c) { return usedCons[c]; });
+  var allCons = ['전체','ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','A'];
+  var activeCons = allCons.filter(function(c) { return c === '전체' || usedCons[c]; });
 
   var out = '';
-
-  // ADD NEW BOOK (위에 배치)
-  out += '<div class="shelf-add" onclick="goAddBook()" style="margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">' +
-    '<div style="display:flex; align-items:center; gap:14px;">' +
-    '<span style="color:var(--accent); font-weight:700; font-family:var(--mono); font-size:11px;">[+]</span>' +
-    '<div style="display:flex; flex-direction:column;">' +
-    '<span style="font-family:var(--vt); font-size:18px; color:var(--accent); letter-spacing:2px; line-height:1;">ADD NEW BOOK</span>' +
-    '</div>' +
-    '</div>' +
-    '<span style="font-family:var(--font); font-size:9px; color:var(--green3); letter-spacing:1.5px; opacity:0.8;">사유 도서 생성기</span>' +
-    '</div>';
 
   // ── 자음 필터 바 ──
   out += '<div style="display:flex;gap:4px;overflow-x:auto;padding:6px 0 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none">';
@@ -3833,31 +3803,59 @@ function renderShelf() {
   out += '</div>';
 
   if (filtered.length === 0) {
-    out += '<div style="text-align:center;padding:20px;font-family:var(--font);font-size:13px;color:var(--dim)">이 자음의 책이 없어요</div>';
+    out += '<div style="text-align:center;padding:30px;font-family:var(--font);font-size:13px;color:var(--dim)">이 자음의 책이 없어요</div>';
   } else {
-    // 노트 목록형
-    filtered.forEach(function(item, listIdx) {
-      var book = item.book;
-      var bi = item.idx;
-      var prog = getBookProgress(bi);
-      var pct = prog.pct;
-      var barW = prog.pct;
-      var delBtn = (bi >= 11 && !book._builtin) ? ' <span onclick="event.stopPropagation();deleteCustomBook(' + bi + ')" style="color:#C04040;font-size:10px;font-family:var(--mono);cursor:pointer;margin-left:6px;">✕</span>' : '';
-      out += '<div onclick="selectBook(' + bi + ')" style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid rgba(160,152,136,0.2);cursor:pointer;">';
-      out += '<span style="font-family:var(--mono);font-size:10px;color:var(--dim);min-width:18px;">' + (listIdx+1) + '</span>';
-      out += '<div style="flex:1;min-width:0;">';
-      out += '<div style="font-family:var(--font);font-size:13px;color:var(--accent);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + book.title + delBtn + '</div>';
-      out += '<div style="font-size:10px;color:var(--dim);margin-top:1px;">' + book.author + '</div>';
-      out += '</div>';
-      out += '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;">';
-      out += '<span style="font-family:var(--mono);font-size:10px;color:' + (pct===100?'#6B8F3E':'var(--green3)') + ';">' + pct + '%</span>';
-      out += '<div style="width:48px;height:3px;background:rgba(160,152,136,0.2);border-radius:2px;"><div style="width:' + barW + '%;height:100%;background:' + (pct===100?'#6B8F3E':'var(--accent)') + ';border-radius:2px;"></div></div>';
-      out += '</div>';
-      out += '</div>';
-    });
+    var item = filtered[ci];
+    var book = item.book;
+    var bi = item.idx;
+    var prog = getBookProgress(bi);
+    var delBtn = (bi >= 11 && !book._builtin) ? '<div onclick="event.stopPropagation();deleteCustomBook(' + bi + ')" style="text-align:center;margin-top:6px;color:#C04040;font-size:11px;font-family:var(--mono);cursor:pointer">[ 삭제 ]</div>' : '';
+
+    // 카드
+    out += '<div style="display:flex;align-items:center;gap:6px">';
+    out += '<button onclick="event.stopPropagation();shelfPrev()" style="width:28px;height:60px;background:none;border:none;font-size:20px;color:#A09888;cursor:pointer;flex-shrink:0">◀</button>';
+
+    out += '<div onclick="selectBook(' + bi + ')" style="flex:1;background:#EDE8E0;border:none;border-radius:3px;padding:16px 16px 16px 18px;cursor:pointer;position:relative;box-shadow:1px 2px 8px rgba(0,0,0,0.1),0 0 0 1px rgba(0,0,0,0.04);background-image:url(\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/><feColorMatrix type=%22saturate%22 values=%220%22/></filter><rect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22 opacity=%220.06%22/></svg>\');background-size:200px">';
+    // 클립 (오른쪽 상단)
+    out += '<svg width="24" height="50" viewBox="0 0 24 50" style="position:absolute;top:-12px;right:20px" fill="none"><path d="M12 0 L12 8 Q12 12 8 12 L8 38 Q8 46 16 46 L16 12 Q16 8 12 8" stroke="#888" stroke-width="1.8" fill="none"/></svg>';
+    out += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">';
+    out += '<span style="font-size:28px">' + book.emo + '</span>';
+    out += '<div><div style="font-family:var(--font);font-size:14px;font-weight:bold;color:#2A2520">' + book.title + '</div>';
+    out += '<div style="font-family:var(--font);font-size:10px;color:#8A8078;margin-top:2px">' + book.author + '</div></div></div>';
+    out += '<span style="font-size:9px;font-family:var(--mono);color:#8A8078;letter-spacing:1px">' + book.chapters.length + ' CHAPTERS</span>';
+
+    if (book.coreLines && book.coreLines[0]) {
+      out += '<div style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.03);border-left:2px solid #A09888;border-radius:2px;font-family:var(--font);font-size:11px;color:#504840;line-height:1.5;font-style:italic">"' + book.coreLines[0] + '"</div>';
+    }
+
+    out += '<div style="margin-top:10px;display:flex;align-items:center;gap:8px">';
+    out += '<div style="flex:1;height:4px;background:rgba(0,0,0,0.08);border-radius:2px;overflow:hidden"><div style="width:' + prog.pct + '%;height:100%;background:#8A8078;border-radius:2px"></div></div>';
+    out += '<span style="font-family:var(--mono);font-size:10px;color:' + (prog.isDone ? '#4A8050' : '#A09888') + ';font-weight:bold">' + prog.status + '</span></div>';
+    out += '</div>';
+
+    out += '<button onclick="event.stopPropagation();shelfNext()" style="width:28px;height:60px;background:none;border:none;font-size:20px;color:#A09888;cursor:pointer;flex-shrink:0">▶</button>';
+    out += '</div>';
+
+    // 카운터
+    out += '<div style="text-align:center;margin-top:6px;font-family:var(--mono);font-size:10px;color:var(--green3)">' + (ci + 1) + ' / ' + filtered.length + '</div>';
+    out += delBtn;
+
+    // 터치 스와이프
+    setTimeout(function() {
+      var card = list.querySelector('[onclick^="selectBook"]');
+      if (card && !card._swipe) {
+        card._swipe = true;
+        var sx = 0;
+        card.addEventListener('touchstart', function(e) { sx = e.touches[0].clientX; }, {passive:true});
+        card.addEventListener('touchend', function(e) {
+          var d = e.changedTouches[0].clientX - sx;
+          if (Math.abs(d) > 50) { if (d > 0) shelfPrev(); else shelfNext(); }
+        });
+      }
+    }, 50);
   }
 
-
+  out += '<div class="shelf-add" onclick="goAddBook()" style="margin-top:10px"><span class="shelf-idx" style="color:var(--accent); font-weight:700">[+]</span><span class="shelf-emo">📚</span><div class="shelf-add-txt">ADD NEW BOOK</div></div>';
   list.innerHTML = out;
 }
 
@@ -4198,55 +4196,11 @@ function loadCh(idx, tabEl) {
 
 var hlActiveBook = -1; // -1 = 전체
 
-// 자음 추출 (MY NOTES용)
-function getConsonantHL(str) {
-  var c = str.charCodeAt(0);
-  if (c >= 0xAC00 && c <= 0xD7A3) {
-    var idx = Math.floor((c - 0xAC00) / 588);
-    return ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'][idx] || 'etc';
-  }
-  if (/[a-zA-Z]/.test(str[0])) return 'A';
-  return 'etc';
-}
-function normConHL(c) { return {'ㄲ':'ㄱ','ㄸ':'ㄷ','ㅃ':'ㅂ','ㅆ':'ㅅ','ㅉ':'ㅈ'}[c] || c; }
-
-if (!window._hlConsonant) window._hlConsonant = '전체';
-
-function renderHLConsonantBar() {
-  var bar = document.getElementById('hlConsonantBar');
-  if (!bar) return;
-  var usedCons = {};
-  BOOKS.forEach(function(b) { usedCons[normConHL(getConsonantHL(b.title))] = true; });
-  var allCons = ['전체','ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','A'];
-  var active = allCons.filter(function(c) { return c === '전체' || usedCons[c]; });
-  var out = '';
-  active.forEach(function(c) {
-    var isA = window._hlConsonant === c;
-    var bg = isA ? '#504840' : 'rgba(160,152,136,0.15)';
-    var color = isA ? '#EDE8E0' : '#706860';
-    var size = c === '전체' ? 'padding:5px 12px' : 'width:32px;height:32px;display:flex;align-items:center;justify-content:center';
-    out += '<button onclick="filterHLCon('' + c + '')" style="' + size + ';background:' + bg + ';color:' + color + ';border:none;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:bold;cursor:pointer;flex-shrink:0">' + c + '</button>';
-  });
-  bar.innerHTML = out;
-}
-
-function filterHLCon(con) {
-  window._hlConsonant = con;
-  hlActiveBook = -1;
-  renderHLConsonantBar();
-  renderHLTabs();
-  renderHLList();
-}
-
 function renderHLTabs() {
   var tabs = document.getElementById('hlTabs');
   if (!tabs) return;
-  var con = window._hlConsonant || '전체';
-  var filteredBooks = con === '전체' ? BOOKS : BOOKS.filter(function(b) {
-    return normConHL(getConsonantHL(b.title)) === con;
-  });
-  var out = '';
-  filteredBooks.forEach(function(book) {
+  var out = '<button class="hl-tab' + (hlActiveBook === -1 ? ' active' : '') + '" onclick="filterHL(-1)">전체</button>';
+  BOOKS.forEach(function(book) {
     var isActive = hlActiveBook === book.id;
     out += '<button class="hl-tab' + (isActive ? ' active' : '') + '" onclick="filterHL(' + book.id + ')">'
       + book.emo + ' ' + book.title.split(' ')[0]
@@ -4262,7 +4216,6 @@ function filterHL(bookId) {
 }
 
 function renderHL() {
-  renderHLConsonantBar();
   renderHLTabs();
   renderHLList();
 }
@@ -4271,9 +4224,7 @@ function renderHLList() {
   var list = document.getElementById('hlList');
   if (!list) return;
   var out = '';
-  var con = window._hlConsonant || '전체';
-  var conFiltered = con === '전체' ? BOOKS : BOOKS.filter(function(b) { return normConHL(getConsonantHL(b.title)) === con; });
-  var booksToShow = hlActiveBook === -1 ? conFiltered : conFiltered.filter(function(b) { return b.id === hlActiveBook; });
+  var booksToShow = hlActiveBook === -1 ? BOOKS : BOOKS.filter(function(b) { return b.id === hlActiveBook; });
   booksToShow.forEach(function(book) {
     out += '<div class="note-book-header">[' + book.emo + '] ' + book.title + '</div>';
     book.chapters.forEach(function(ch, idx) {
