@@ -1319,67 +1319,6 @@ body { display:flex; justify-content:center; }
 </head>
 <body>
 <div class="phone">
-<div class="particles" id="particleLayer"></div>
-
-<style>
-.particles {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  pointer-events: none;
-  z-index: -1;
-  overflow: hidden;
-}
-.particle {
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0;
-  animation: floatParticle linear infinite;
-}
-@keyframes floatParticle {
-  0% { opacity: 0; transform: translateY(0) translateX(0) rotate(0deg); }
-  10% { opacity: var(--po); }
-  90% { opacity: var(--po); }
-  100% { opacity: 0; transform: translateY(var(--dy)) translateX(var(--dx)) rotate(360deg); }
-}
-</style>
-<script>
-(function(){
-  var layer = document.getElementById('particleLayer');
-  if (!layer) return;
-  var count = 45;
-  for (var i = 0; i < count; i++) {
-    var el = document.createElement('div');
-    el.className = 'particle';
-    var isLarge = Math.random() > 0.75;
-    var isMed   = !isLarge && Math.random() > 0.5;
-    var size    = isLarge ? (10 + Math.random()*8)
-                : isMed   ? (4  + Math.random()*4)
-                :            (1  + Math.random()*2);
-    var opacity = isLarge ? (0.45 + Math.random()*0.3)
-                : isMed   ? (0.3  + Math.random()*0.25)
-                :            (0.2  + Math.random()*0.2);
-    var duration = isLarge ? (22 + Math.random()*18)
-                 : isMed   ? (16 + Math.random()*14)
-                 :            (12 + Math.random()*10);
-    var delay   = Math.random() * 20;
-    var startX  = -5 + Math.random() * 30;
-    var startY  = Math.random() * 100;
-    var dx      = 110 + Math.random() * 60;
-    var dy      = -8  + Math.random() * 16;
-    var r = 30 + Math.floor(Math.random()*40);
-    var g = 90 + Math.floor(Math.random()*40);
-    var b = 30 + Math.floor(Math.random()*30);
-    el.style.cssText =
-      'left:'+startX+'%;top:'+startY+'%;'+
-      'width:'+size+'px;height:'+size+'px;'+
-      'background:rgba('+r+','+g+','+b+','+opacity+');'+
-      'animation-duration:'+duration+'s;'+
-      'animation-delay:-'+delay+'s;'+
-      '--po:'+opacity+';--dx:'+dx+'px;--dy:'+dy+'px;';
-    layer.appendChild(el);
-  }
-})();
-</script>
 
 <!-- HOME -->
 <div id="home" class="screen active">
