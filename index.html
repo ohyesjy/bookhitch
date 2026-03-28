@@ -3809,7 +3809,7 @@ function renderShelf() {
     var book = item.book;
     var bi = item.idx;
     var prog = getBookProgress(bi);
-    var delBtn = (bi >= 11 && !book._builtin) ? '<div onclick="event.stopPropagation();deleteCustomBook(' + bi + ')" style="text-align:center;margin-top:6px;color:#C04040;font-size:11px;font-family:var(--mono);cursor:pointer">[ 삭제 ]</div>' : '';
+    var delBtn = (!book._builtin && bi > 0) ? '<div onclick="event.stopPropagation();deleteCustomBook(' + bi + ')" style="text-align:center;margin-top:8px;font-family:var(--mono);font-size:10px;color:#C04040;letter-spacing:1px;cursor:pointer;">[ 삭제 ]</div>' : '';
 
     // 카드
     out += '<div style="display:flex;align-items:center;gap:6px">';
@@ -4884,7 +4884,7 @@ function renderSrch(q) {
 }
 function deleteCustomBook(idx) {
   var book = BOOKS[idx];
-  if (!book || idx < 11) return;
+  if (!book) return;
   if (!confirm('"' + book.title + '" 을 삭제할까요?')) return;
   BOOKS.splice(idx, 1);
   // Re-assign IDs
