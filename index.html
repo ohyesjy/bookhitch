@@ -1339,13 +1339,13 @@ body { display:flex; justify-content:center; }
     </div>
     <div class="sec fu3">// 🧠 오늘의 뇌자극 퀴즈</div>
     <div class="streak-wrap fu3" id="quizWrap" onclick="showNextQuiz()" style="cursor:pointer">
-      <div style="display:flex; gap:14px; align-items:flex-start; padding:5px 0; border-bottom:1px solid var(--dimmer); position:relative;">
+      <div style="display:flex; gap:16px; align-items:flex-start; padding:14px 0; border-bottom:1px solid var(--dimmer); position:relative;">
         <div id="quizSketch" style="flex-shrink:0"></div>
         <div style="flex:1">
-          <div id="quizQuestion" style="font-family:var(--font); font-size:14px; color:var(--accent); line-height:1.5; font-weight:bold; word-break:keep-all; overflow:visible;"></div>
+          <div id="quizQuestion" style="font-family:var(--font); font-size:11px; color:var(--accent); line-height:1.4; font-weight:bold;"></div>
           <div id="quizOptions" style="margin-top:6px;"></div>
           <div id="quizResult" style="margin-top:5px; font-family:var(--font); font-size:12px; display:none;"></div>
-          <div style="margin-top:5px; font-size:9px; color:var(--green3); letter-spacing:1px;">TAP FOR NEXT QUIZ →</div>
+          <div style="margin-top:8px; font-size:11px; color:var(--green3); letter-spacing:1px;">TAP FOR NEXT QUIZ →</div>
         </div>
 
       </div>
@@ -4021,10 +4021,10 @@ function showQuiz() {
       + '<button onclick="event.stopPropagation();answerQuiz(false)" style="padding:7px 20px;background:#7A3030;color:#F9E8E8;border:none;border-radius:20px;font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;letter-spacing:1px;">X 아니야</button>';
   } else if (quiz.type === 'word') {
     qEl.innerHTML = quiz.q;
-    optEl.innerHTML = '<button onclick="event.stopPropagation();revealAnswer()" style="padding:6px 16px;background:var(--accent);color:#E7F9A9;border:none;border-radius:6px;font-family:var(--mono);font-size:11px;cursor:pointer">🤔 정답 보기</button>';
+    optEl.innerHTML = '<button onclick="event.stopPropagation();revealAnswer()" style="padding:10px 20px;background:var(--accent);color:#E7F9A9;border:none;border-radius:8px;font-family:var(--mono);font-size:14px;cursor:pointer">🤔 정답 보기</button>';
   } else {
     qEl.innerHTML = quiz.q + '<br><span style="font-weight:normal;font-size:11px;color:#6A3040;">' + quiz.hint + '</span>';
-    optEl.innerHTML = '<button onclick="event.stopPropagation();revealAnswer()" style="padding:6px 16px;background:var(--accent);color:#E7F9A9;border:none;border-radius:6px;font-family:var(--mono);font-size:11px;cursor:pointer">💡 정답 확인</button>';
+    optEl.innerHTML = '<button onclick="event.stopPropagation();revealAnswer()" style="padding:10px 20px;background:var(--accent);color:#E7F9A9;border:none;border-radius:8px;font-family:var(--mono);font-size:14px;cursor:pointer">💡 정답 확인</button>';
   }
 }
 
