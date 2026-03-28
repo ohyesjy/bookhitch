@@ -239,11 +239,11 @@ body { display:flex; justify-content:center; }
 
 .shelf-add {
   display: flex; align-items: center; gap: 14px;
-  padding: 10px 0; cursor: pointer; opacity: 0.4;
+  padding: 12px 0; cursor: pointer; opacity: 1;
   transition: opacity 0.15s;
 }
-.shelf-add:active { opacity: 0.7; }
-.shelf-add-txt { font-size: 11px; color: var(--green3); letter-spacing: 1px; }
+.shelf-add:active { opacity: 0.6; }
+.shelf-add-txt { font-size: 12px; color: var(--accent); letter-spacing: 2px; font-weight: 700; }
 
 .menu-wrap { padding: 0 20px; }
 .menu-item {
@@ -3855,7 +3855,7 @@ function renderShelf() {
     }, 50);
   }
 
-  out += '<div class="shelf-add" onclick="goAddBook()" style="margin-top:10px"><span class="shelf-idx" style="color:var(--dim)">[+]</span><span class="shelf-emo" style="opacity:0.3">📚</span><div class="shelf-add-txt">ADD NEW BOOK</div></div>';
+  out += '<div class="shelf-add" onclick="goAddBook()" style="margin-top:10px"><span class="shelf-idx" style="color:var(--accent); font-weight:700">[+]</span><span class="shelf-emo">📚</span><div class="shelf-add-txt">ADD NEW BOOK</div></div>';
   list.innerHTML = out;
 }
 
