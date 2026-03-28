@@ -3224,7 +3224,7 @@ const BOOKS = [
   // 초등 추천도서 10권 (사고력 발달)
   // ═══════════════════════════════════
   {
-    id: 11, title: '나의 라임 오렌지나무', author: '바스콘셀로스', emo: '🍊',
+    id: 11, _builtin:true, title: '나의 라임 오렌지나무', author: '바스콘셀로스', emo: '🍊',
     progress: 0, status: 'QUEUE',
     coreLines: ['나는 너무 일찍 철이 들었던 것 같습니다', '사랑하는 뽀르뚜가, 밍기뉴가 처음 꽃을 피웠어요', '악마 같은 아이는 없다. 사랑받지 못한 아이만 있을 뿐이다'],
     bigQ: '사랑받지 못하는 아이는 정말 나쁜 아이일까?',
@@ -3271,7 +3271,7 @@ const BOOKS = [
     ]
   },
   {
-    id: 12, title: '원더', author: 'R.J. 팔라시오', emo: '👦',
+    id: 12, _builtin:true, title: '원더', author: 'R.J. 팔라시오', emo: '👦',
     progress: 0, status: 'QUEUE',
     coreLines: ['친절을 선택할 수 있다면 항상 친절을 선택하라', '모두가 일 년에 한 번은 기립박수를 받아야 한다', '네가 어떻게 생겼든 중요한 건 네가 어떤 사람이냐는 거야'],
     bigQ: '외모가 다른 사람을 처음 만났을 때 나는 어떻게 행동할까?',
@@ -3309,7 +3309,7 @@ const BOOKS = [
     ]
   },
   {
-    id: 13, title: '꽃들에게 희망을', author: '트리나 폴러스', emo: '🐛',
+    id: 13, _builtin:true, title: '꽃들에게 희망을', author: '트리나 폴러스', emo: '🐛',
     progress: 0, status: 'QUEUE',
     coreLines: ['기어오르는 것만이 전부는 아니야', '날 수 있다는 걸 믿어야 날개가 펼쳐져', '꽃이 되기 위해 애벌레는 자기를 포기해야 해'],
     bigQ: '남들이 다 하는 걸 따라하는 게 맞을까, 나만의 길을 가는 게 맞을까?',
@@ -3404,6 +3404,7 @@ function renderShelf() {
     var isDone = prog.isDone;
     var statusColor = isDone ? 'var(--green3)' : '';
     var fillOpacity = isDone ? ';opacity:0.35' : '';
+    var delBtn = (i >= 11 && !book._builtin) ? '<button onclick="event.stopPropagation();deleteCustomBook(' + i + ')" style="background:none;border:none;color:#C04040;font-size:11px;padding:4px 8px;font-family:var(--mono);cursor:pointer">✕</button>' : '';
     out += '<div class="shelf-item" onclick="selectBook(' + i + ')">'
       + '<span class="shelf-idx">[' + i + ']</span>'
       + '<span class="shelf-emo">' + book.emo + '</span>'
@@ -3413,6 +3414,7 @@ function renderShelf() {
       + '</div>'
       + '<div class="shelf-bar"><div class="shelf-bar-fill" style="width:' + prog.pct + '%' + fillOpacity + '"></div></div>'
       + '<div class="shelf-status"' + (statusColor ? ' style="color:' + statusColor + '"' : '') + '>' + prog.status + '</div>'
+      + delBtn
       + '</div>';
   });
   staticBooks.forEach(function(b, i) {
@@ -4288,7 +4290,7 @@ async function generateBookWithAI() {
     if (bar) { var w = parseFloat(bar.style.width); if (w < 88) bar.style.width = (w + Math.random()*4) + '%'; }
   }, 1500);
 
-  var prompt = '책 "' + title + '"(' + (author || '미상') + '). JSON만(```없이):\n{"title":"제목","author":"저자","emoji":"이모지","genre":"장르","coreLines":["명문장1","명문장2","명문장3"],"emotions":[{"ch":"CH.1","label":"감정","color":"#색상","h":높이}],"chapters":[{"t":"1장","s":"목차제목","body":"7줄 핵심내용. 이것만 읽어도 해당 목차를 다 읽은 느낌. 구체적 장면/인물/대사 포함. 초등고학년 눈높이.","qt":"인용구","sm":["요약1","요약2"],"q":"논리적사고질문","fe":"이모지2개","sk":"키워드","w":[{"w":"어려운단어","d":"뜻풀이","e":"예문"}]}]}\n규칙:\n1. 이 책에 실제 목차/챕터가 있으면 그 구조를 따라서 나눠. 목차가 너무 많으면 핵심 4~6개로 묶어.\n2. 목차가 없는 책(수필/에세이 등)은 내용 흐름에 따라 4~5개로 나눠.\n3. 마지막은 isLast:true + 작가의도/결말 포함.\n4. q는 논리적 사고를 자극하는 질문. "왜 그랬을까?" "만약 ~했다면?" "네 생각은?" 형태로.\n5. w는 초등고학년이 모를 단어 2개씩. 뜻풀이는 초등3학년도 이해할 쉬운 일상 대화체로.\nsk:mountain/tree/river/sea/flower/star/moon/person/heart/tear/eye/hand/book/house/key/clock/mirror/candle/bird/fire/road/bridge/empty/temple.\n실제 책 내용만. 모르면 title에 "정보부족".';
+  var prompt = '책 "' + title + '"(' + (author || '미상') + '). JSON만(```없이):\n{"title":"제목","author":"저자","emoji":"이모지","genre":"장르","coreLines":["핵심명문장1(원문에 가깝게)","명문장2","명문장3"],"emotions":[{"ch":"CH.1","label":"감정","color":"#색상","h":높이}],"chapters":[{"t":"1장","s":"목차제목","body":"핵심내용","qt":"원작의 핵심 인용구(원문에 가깝게)","sm":["요약1","요약2"],"q":"논리적사고질문","ct":"비판적사고질문","lt":"논리적추론질문","fe":"이모지2개","sk":"키워드","w":[{"w":"단어","d":"뜻","e":"예문"}]}]}\n\nbody 작성 규칙:\n- 7줄 이상. 이것만 읽어도 해당 챕터를 실제로 읽은 느낌이 나야 함\n- 구체적 장면, 등장인물 이름, 핵심 대사 반드시 포함\n- 원작에 풍자/알레고리/상징이 있으면 반드시 설명 (예: 나폴레옹=스탈린, 모비딕=자연의 힘)\n- 작가가 이 장면을 통해 말하고 싶은 메시지를 마지막에 한 줄로\n- 초등 고학년 눈높이로 쉽게 설명하되 내용의 깊이는 유지\n\n전체 규칙:\n1. 실제 목차/챕터 구조를 따라 4~6개로 나누기\n2. 마지막은 isLast:true + 작가의도/결말\n3. q: 사유질문, ct: 비판적사고("정말 그럴까?" "반대로 생각하면?"), lt: 논리적추론("만약~라면?" "원인은?")\n4. w: 초등고학년이 모를 단어 2개씩. 뜻은 초등3학년도 이해할 일상 대화체\n5. qt: 원작의 실제 문장을 최대한 살려서\nsk:mountain/tree/river/sea/flower/star/moon/person/heart/tear/eye/hand/book/house/key/clock/mirror/candle/bird/fire/road/bridge/empty/temple.\n실제 책 내용만 정확히. 모르면 title에 "정보부족".';
 
   try {
     var res = await fetch('/.netlify/functions/claude', {
@@ -4393,6 +4395,20 @@ function renderSrch(q) {
     `<div class="res-item"><span class="res-idx">[${i}]</span><div class="res-emo">${b.e}</div><div style="flex:1"><div class="res-ttl">${b.t}</div><div class="res-auth">${b.a}</div><div class="res-genre">${b.g}</div></div><button class="res-add" onclick="showToast('ADDED')">ADD</button></div>`
   ).join('');
 }
+function deleteCustomBook(idx) {
+  var book = BOOKS[idx];
+  if (!book || idx < 11) return;
+  if (!confirm('"' + book.title + '" 을 삭제할까요?')) return;
+  BOOKS.splice(idx, 1);
+  // Re-assign IDs
+  BOOKS.forEach(function(b, i) { b.id = i; });
+  // Save custom books
+  try { _set('bh5_custom_books', BOOKS.slice(11).filter(function(b) { return !b._builtin; })); } catch(e) {}
+  renderShelf();
+  renderToday();
+  showToast('"' + book.title + '" 삭제됨');
+}
+
 function filterBooks(v) { renderSrch(v); }
 
 window.addEventListener('load', function() {
