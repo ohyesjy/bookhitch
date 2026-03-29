@@ -79,10 +79,10 @@ body { display:flex; justify-content:center; }
 }
 .app-name {
   font-family: '돋움', 'Dotum', sans-serif;
-  font-size: 37px;
+  font-size: 68px;
   font-weight: 800;
   color: var(--accent);
-  letter-spacing: 2px;
+  letter-spacing: 0px;
   line-height: 1;
   text-shadow: 0 0 16px rgba(61,8,20,0.2);
 }
@@ -200,7 +200,7 @@ body { display:flex; justify-content:center; }
   box-shadow: 0 0 8px rgba(212,240,96,0.4);
 }
 
-.shelf-wrap { padding: 0; }
+.shelf-wrap { padding: 0; display: none; }
 .shelf-list { padding: 0 20px; }
 .shelf-item {
   display: flex; align-items: center; gap: 14px;
@@ -1310,7 +1310,7 @@ body { display:flex; justify-content:center; }
   font-size: 0.9em;
 }
 </style>
-<!-- deploy: 1774764454 -->
+<!-- deploy: 1774764684 -->
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute">
@@ -1327,10 +1327,14 @@ body { display:flex; justify-content:center; }
 <div id="home" class="screen active">
     <div class="home-wrap">
     <div class="home-hd fu">
-      <div class="app-name" onclick="navTo('home')" style="cursor:pointer">BOOKHITCH<span style="font-family:'Caveat',cursive;font-size:28px;font-weight:700;color:#1A0800;margin-left:10px;transform:rotate(-8deg);display:inline-block;vertical-align:middle;"> is</span></div>
+      <div class="app-name" onclick="navTo('home')" style="cursor:pointer">BOOKHITCH</div>
+      <svg width="100%" height="18" viewBox="0 0 320 18" preserveAspectRatio="none" style="display:block;margin-top:2px;margin-bottom:4px;">
+        <path d="M4,10 C30,6 80,14 140,9 C200,4 260,13 316,8" stroke="var(--accent)" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.9"/>
+        <path d="M2,14 C50,11 110,16 180,13 C240,10 290,15 318,12" stroke="var(--accent)" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5"/>
+      </svg>
       <div class="app-sub">네 뇌근육을 위한, 사유독서</div>
     </div>
-    <div class="sec fu2">// TODAY</div>
+    <div class="sec fu2" style="display:none">// TODAY</div>
     <div class="today-wrap fu2">
       <div class="today-block" onclick="goReader()" id="todayBlock">
         <div class="today-pre" id="todayPre"></div>
@@ -1349,7 +1353,7 @@ body { display:flex; justify-content:center; }
         <div style="margin-top:12px; font-size:11px; color:var(--green3); letter-spacing:1px;">TAP FOR NEXT QUIZ →</div>
       </div>
     </div>
-    <div class="sec fu4">// 네 도서목록</div>
+    <div class="sec fu4" style="display:none">// 네 도서목록</div>
     <div class="shelf-wrap fu4">
       <div class="shelf-list" id="shelfList"></div>
     </div>
