@@ -19,7 +19,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Space+Grotesk:wght@700;800&family=Caveat:wght@700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:     #EFF1F2;
+  --bg:     #B1EFC1;
   --bg2:    #E8B97A;
   --accent: #1A0D00;
   --accent2:#3D1A00;
@@ -37,7 +37,7 @@
 }
 
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-html, body { height:100%; overflow:hidden; background:#EFF1F2; font-family:var(--font); }
+html, body { height:100%; overflow:hidden; background:#B1EFC1; font-family:var(--font); }
 body { display:flex; justify-content:center; }
 
 .phone {
@@ -51,8 +51,7 @@ body { display:flex; justify-content:center; }
 .phone::before {
   content:'';
   position:absolute; inset:0; z-index:9999; pointer-events:none;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeBlend in='SourceGraphic' mode='overlay' result='blend'/%3E%3C/filter%3E%3Crect width='300' height='300' fill='%23F5F6F0' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E") repeat;
-  opacity: 0.4;
+  background: none;
 }
 
 .phone::after {
@@ -1311,7 +1310,7 @@ body { display:flex; justify-content:center; }
   font-size: 0.9em;
 }
 </style>
-<!-- deploy: 1774764027 -->
+<!-- deploy: 1774764158 -->
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute">
