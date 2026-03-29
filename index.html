@@ -19,25 +19,25 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Space+Grotesk:wght@700;800&family=Caveat:wght@700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:     #B3F0C0;
-  --bg2:    #E8B97A;
-  --accent: #0B411B;
-  --accent2:#1A5C2E;
-  --accent3:#2E7A45;
-  --dim:    #0B411B;
+  --bg:     #FFFFFF;
+  --bg2:    #F5F5F5;
+  --accent: #070707;
+  --accent2:#222222;
+  --accent3:#444444;
+  --dim:    #222222;
   --dimmer: rgba(0,0,0,0.2);
   --font:   'Noto Sans KR', sans-serif;
   --vt:     'Playfair Display', 'Noto Sans KR', serif;
   --mono:   'IBM Plex Mono', monospace;
 
   /* 하위 호환 */
-  --green:  #0B411B;
-  --green2: #1A5C2E;
-  --green3: #2E7A45;
+  --green:  #070707;
+  --green2: #222222;
+  --green3: #444444;
 }
 
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-html, body { height:100%; overflow:hidden; background:#B3F0C0; font-family:var(--font); }
+html, body { height:100%; overflow:hidden; background:#FFFFFF; font-family:var(--font); }
 body { display:flex; justify-content:center; }
 
 .phone {
@@ -279,7 +279,7 @@ body { display:flex; justify-content:center; }
 }
 
 #reader {
-  background: #F5F0E4;
+  background: #FFFFFF;
 
   display: none;
   flex-direction: column;
@@ -291,7 +291,7 @@ body { display:flex; justify-content:center; }
 }
 
 .r-hd {
-  background: #EDE8D8;
+  background: #FFFFFF;
   padding: 48px 14px 0;
   position: relative;
   z-index: 10;
@@ -345,10 +345,10 @@ body { display:flex; justify-content:center; }
   transform: scale(1.2);
   box-shadow: 0 0 4px rgba(255,255,255,0.4);
 }
-.h-dot.yellow { background: #887720; }
-.h-dot.green  { background: #207040; }
-.h-dot.pink   { background: #881030; }
-.h-dot.blue   { background: #204878; }
+.h-dot.yellow { background: #FFFFFF; }
+.h-dot.green  { background: #FFFFFF; }
+.h-dot.pink   { background: #FFFFFF; }
+.h-dot.blue   { background: #FFFFFF; }
 
 /* ── 챕터 탭 (수정 1: 폰트 겹침 해결) ── */
 .ch-tabs {
@@ -425,7 +425,7 @@ body { display:flex; justify-content:center; }
 /* ── READER BODY ── */
 .r-body {
   padding: 24px 20px 32px;
-  background: #F5F0E4;
+  background: #FFFFFF;
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
@@ -600,7 +600,7 @@ body { display:flex; justify-content:center; }
   font-size: 15px; color: rgba(28,43,110,0.55);
 }
 .q-save {
-  background: #1C2B6E;
+  background: #FFFFFF;
   border: none;
   font-family: var(--vt);
   font-size: 17px;
@@ -617,7 +617,7 @@ body { display:flex; justify-content:center; }
   user-select: none;
   -webkit-user-select: none;
 }
-.q-save:active { background: #CC2200; }
+.q-save:active { background: #FFFFFF; }
 .q-save:disabled {
   background: rgba(28,43,110,0.2);
   color: rgba(28,43,110,0.4);
@@ -696,10 +696,10 @@ body { display:flex; justify-content:center; }
   content: ''; position: absolute;
   left: 0; top: 12px; bottom: 12px; width: 2px;
 }
-.hl-item.yellow::before { background: #887700; }
+.hl-item.yellow::before { background: #FFFFFF; }
 .hl-item.green::before  { background: var(--green3); }
-.hl-item.pink::before   { background: #770030; }
-.hl-item.blue::before   { background: #004477; }
+.hl-item.pink::before   { background: #FFFFFF; }
+.hl-item.blue::before   { background: #FFFFFF; }
 .hl-txt  { font-size: 11px; color: rgba(0,255,65,0.75); line-height: 1.75; padding-left: 10px; margin-bottom: 5px; }
 .hl-meta { display:flex; align-items:center; justify-content:space-between; padding-left:10px; }
 .hl-book { font-size: 8.5px; color: var(--green3); letter-spacing: 0.5px; }
@@ -969,13 +969,13 @@ body { display:flex; justify-content:center; }
 }
 .ending-inp::placeholder { color: rgba(28,43,110,0.35); }
 .ending-save {
-  background: #1C2B6E; border: none;
+  background: #FFFFFF; border: none;
   font-family: var(--vt); font-size: 15px;
   color: #fff; letter-spacing: 2px;
   cursor: pointer; padding: 5px 14px;
   margin-top: 8px; display: inline-block;
 }
-.ending-save:active { background: #CC2200; }
+.ending-save:active { background: #FFFFFF; }
 .ending-done { font-family: var(--vt); font-size: 15px; color: #1C2B6E; line-height: 1.55; }
 .ending-done-lbl { font-size: 10px; color: rgba(28,43,110,0.5); letter-spacing: 1.5px; margin-bottom: 4px; }
 .ending-re {
@@ -983,7 +983,7 @@ body { display:flex; justify-content:center; }
   font-family: var(--vt); font-size: 12px; color: rgba(28,43,110,0.55);
   cursor: pointer; padding: 3px 10px; margin-top:6px; display:inline-block;
 }
-.ending-re:active { background: #CC2200; color:#fff; border-color:#CC2200; }
+.ending-re:active { background: #FFFFFF; color:#fff; border-color:#CC2200; }
 
 .cast-inline {
   margin-bottom: 14px;
@@ -1122,7 +1122,7 @@ body { display:flex; justify-content:center; }
 .toast {
   position: fixed; bottom: 76px; left: 50%;
   transform: translateX(-50%) translateY(12px);
-  background: #3d0814; color: #E7F9A9;
+  background: #FFFFFF; color: #E7F9A9;
   padding: 7px 14px; font-size: 10px;
   letter-spacing: 2px; text-transform: uppercase;
   opacity: 0; transition: all 0.22s;
@@ -1285,7 +1285,7 @@ body { display:flex; justify-content:center; }
   margin-top: 8px; display: inline-block;
   transition: all 0.15s;
 }
-.sayu-memo-save:active { background: #3d0814; color: #E7F9A9; border-color: #3d0814; }
+.sayu-memo-save:active { background: #FFFFFF; color: #E7F9A9; border-color: #3d0814; }
 .sayu-memo-re {
   background: none; border: none;
   font-family: var(--vt); font-size: 11px;
@@ -1310,7 +1310,7 @@ body { display:flex; justify-content:center; }
   font-size: 0.9em;
 }
 </style>
-<!-- deploy: 1774764684 -->
+<!-- deploy: 1774764851 -->
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute">
@@ -1441,7 +1441,7 @@ body { display:flex; justify-content:center; }
     ">
     <button onclick="generateBookWithAI()" style="
       width: 100%; padding: 14px;
-      background: #3d0814; color: #E7F9A9;
+      background: #FFFFFF; color: #E7F9A9;
       border: none; border-radius: 8px;
       font-family: var(--mono); font-size: 12px;
       letter-spacing: 2px; cursor: pointer;
@@ -1464,7 +1464,7 @@ body { display:flex; justify-content:center; }
     <button id="aiJsonBtn" onclick="applyBookJSON()" style="
       display: none;
       width: 100%; padding: 14px; margin-top: 8px;
-      background: #2A6040; color: #E7F9A9;
+      background: #FFFFFF; color: #E7F9A9;
       border: none; border-radius: 8px;
       font-family: var(--mono); font-size: 12px;
       letter-spacing: 2px; cursor: pointer;
@@ -3834,7 +3834,7 @@ function renderShelf() {
     }
 
     out += '<div style="margin-top:10px;display:flex;align-items:center;gap:8px">';
-    out += '<div style="flex:1;height:4px;background:rgba(0,0,0,0.08);border-radius:2px;overflow:hidden"><div style="width:' + prog.pct + '%;height:100%;background:#8A8078;border-radius:2px"></div></div>';
+    out += '<div style="flex:1;height:4px;background:rgba(0,0,0,0.08);border-radius:2px;overflow:hidden"><div style="width:' + prog.pct + '%;height:100%;background:#FFFFFF;border-radius:2px"></div></div>';
     out += '<span style="font-family:var(--mono);font-size:10px;color:' + (prog.isDone ? '#4A8050' : '#A09888') + ';font-weight:bold">' + prog.status + '</span></div>';
     out += '</div>';
 
@@ -4020,8 +4020,8 @@ function showQuiz() {
 
   if (quiz.type === 'ox') {
     qEl.innerHTML = quiz.q + '<br><span style="font-weight:normal;font-size:12px;color:#6A3040;">"' + quiz.statement + '"</span>';
-    optEl.innerHTML = '<button onclick="event.stopPropagation();answerQuiz(true)" style="padding:7px 20px;margin-right:8px;background:#5A7A20;color:#E7F9A9;border:none;border-radius:20px;font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;letter-spacing:1px;">O 맞아</button>'
-      + '<button onclick="event.stopPropagation();answerQuiz(false)" style="padding:7px 20px;background:#7A3030;color:#F9E8E8;border:none;border-radius:20px;font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;letter-spacing:1px;">X 아니야</button>';
+    optEl.innerHTML = '<button onclick="event.stopPropagation();answerQuiz(true)" style="padding:7px 20px;margin-right:8px;background:#FFFFFF;color:#E7F9A9;border:none;border-radius:20px;font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;letter-spacing:1px;">O 맞아</button>'
+      + '<button onclick="event.stopPropagation();answerQuiz(false)" style="padding:7px 20px;background:#FFFFFF;color:#F9E8E8;border:none;border-radius:20px;font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;letter-spacing:1px;">X 아니야</button>';
   } else if (quiz.type === 'word') {
     qEl.innerHTML = quiz.q;
     optEl.innerHTML = '<button onclick="event.stopPropagation();revealAnswer()" style="padding:10px 20px;background:var(--accent);color:#E7F9A9;border:none;border-radius:8px;font-family:var(--mono);font-size:14px;cursor:pointer">🤔 정답 보기</button>';
