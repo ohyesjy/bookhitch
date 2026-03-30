@@ -1317,7 +1317,7 @@ body { display:flex; justify-content:center; }
   font-size: 0.9em;
 }
 </style>
-<!-- deploy: 1774845026 -->
+<!-- deploy: 1774845047 -->
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute">
@@ -4954,6 +4954,7 @@ async function generateBookWithAI() {
 
     if (!res.ok) {
       var errText = ''; try { errText = await res.text(); } catch(e2) {}
+      if (res.status === 504) { throw new Error('RETRY_504'); }
       throw new Error('서버 오류: ' + res.status);
     }
 
@@ -4995,7 +4996,12 @@ async function generateBookWithAI() {
   } catch(e) {
     console.error(e);
     clearInterval(pTimer);
-    status.innerHTML = '❌ ' + e.message + '<br>아래에 직접 붙여넣기 해주세요.';
+    if (e.message === 'RETRY_504') {
+      status.innerHTML = '⏳ 서버 준비 중... 3초 후 자동 재시도합니다.';
+      setTimeout(function() { generateBookWithAI(); }, 3000);
+      return;
+    }
+    status.innerHTML = '❌ ' + e.message + '<br>다시 시도해주세요.';
     document.getElementById('aiJsonInput').style.display = 'block';
     document.getElementById('aiJsonBtn').style.display = 'block';
   } finally {
