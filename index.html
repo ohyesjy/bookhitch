@@ -1317,7 +1317,7 @@ body { display:flex; justify-content:center; }
   font-size: 0.9em;
 }
 </style>
-<!-- deploy: 1774843269 -->
+<!-- deploy: 1774843309 -->
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute">
@@ -1491,7 +1491,7 @@ body { display:flex; justify-content:center; }
 
 <!-- NAV -->
 <div class="nav">
-  <button class="n-btn" id="nav-reader" onclick="goReader()">
+  <button class="n-btn" id="nav-reader" onclick="goBack()">
     <span class="n-ico">←</span><span class="n-lbl">뒤로</span>
   </button>
   <button class="n-btn" id="nav-highlights" onclick="navTo('shelf')">
@@ -3737,6 +3737,9 @@ const SRCH = [
 ];
 
 function navTo(id) {
+  if (!window._navHistory) window._navHistory = [];
+  var cur = document.querySelector('.screen.active');
+  if (cur && cur.id && cur.id !== id) window._navHistory.push(cur.id);
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if(id==='shelf'){renderShelfFull();}
@@ -4012,6 +4015,18 @@ function _renderShelfList() {
   });
 }
 
+function goBack() {
+  if (!window._navHistory || window._navHistory.length === 0) {
+    navTo('home'); return;
+  }
+  var prev = window._navHistory.pop();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(prev).classList.add('active');
+  document.querySelectorAll('.n-btn').forEach(b => b.classList.remove('active'));
+  var nb = document.getElementById('nav-' + prev);
+  if (nb) nb.classList.add('active');
+  if (prev === 'shelf') _renderShelfList();
+}
 function initQuiz() {
   quizPool = [];
   // 모든 책에서 퀴즈 생성
