@@ -1317,7 +1317,7 @@ body { display:flex; justify-content:center; }
   font-size: 0.9em;
 }
 </style>
-<!-- deploy: 1774842865 -->
+<!-- deploy: 1774842911 -->
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute">
@@ -3739,7 +3739,7 @@ const SRCH = [
 function navTo(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  if(id==='shelf'){var el=document.getElementById('shelfFullList');if(el){el.innerHTML='';BOOKS.forEach(function(b,i){var d=document.createElement('div');d.style.cssText='padding:14px;border-bottom:0.5px solid rgba(0,0,0,0.1);cursor:pointer;display:flex;align-items:center;gap:12px;';d.innerHTML='<span style="font-size:24px">'+(b.emoji||'📖')+'</span><div><div style="font-weight:700;font-size:14px;color:var(--accent)">'+b.title+'</div><div style="font-size:11px;color:var(--dim);margin-top:2px">'+b.author+'</div></div>';d.onclick=function(){curBookIdx=i;CHS=BOOKS[i].chapters;navTo('reader');renderChTabs(0);};el.appendChild(d);});}}
+  if(id==='shelf'){renderShelfFull();}
   document.querySelectorAll('.n-btn').forEach(b => b.classList.remove('active'));
   const nb = document.getElementById('nav-' + id);
   if (nb) nb.classList.add('active');
@@ -3964,6 +3964,52 @@ function getQuizSketch(type) {
   var svg = sketches[type] || sketches[keys[Math.floor(Math.random() * keys.length)]];
   svg = svg.replace(/C/g, c);
   return '<svg width="100" height="95" viewBox="0 0 100 95" fill="none">' + w + '<g filter="url(#qwob)">' + svg + '</g></svg>';
+}
+
+
+function renderShelfFull() {
+  var cons = ['전체','ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','*'];
+  var bar = document.getElementById('shelfConBar');
+  if (bar && bar.children.length === 0) {
+    if (!window._shelfFullFilter) window._shelfFullFilter = '전체';
+    cons.forEach(function(c) {
+      var btn = document.createElement('button');
+      btn.textContent = c;
+      var active = (c === window._shelfFullFilter);
+      btn.style.cssText = 'flex-shrink:0;padding:4px 10px;border-radius:16px;border:1px solid rgba(0,0,0,0.2);background:'+(active?'var(--accent)':'transparent')+';color:'+(active?'#fff':'var(--accent)')+';font-size:12px;cursor:pointer;font-family:var(--font);';
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        window._shelfFullFilter = c;
+        document.querySelectorAll('#shelfConBar button').forEach(function(b){ b.style.background='transparent'; b.style.color='var(--accent)'; });
+        btn.style.background='var(--accent)'; btn.style.color='#fff';
+        _renderShelfList();
+      };
+      bar.appendChild(btn);
+    });
+  }
+  _renderShelfList();
+}
+function _renderShelfList() {
+  var el = document.getElementById('shelfFullList');
+  if (!el) return;
+  el.innerHTML = '';
+  var filter = window._shelfFullFilter || '전체';
+  BOOKS.forEach(function(b,i) {
+    var con = '*';
+    var first = b.title.charCodeAt(0);
+    if (first >= 0xAC00 && first <= 0xD7A3) {
+      var ci = Math.floor((first - 0xAC00) / 588);
+      var rawCon = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'][ci];
+      con = {'ㄲ':'ㄱ','ㄸ':'ㄷ','ㅃ':'ㅂ','ㅆ':'ㅅ','ㅉ':'ㅈ'}[rawCon] || rawCon;
+    }
+    if (filter !== '전체' && filter !== con) return;
+    var d = document.createElement('div');
+    d.style.cssText = 'padding:14px;border-bottom:0.5px solid rgba(0,0,0,0.1);cursor:pointer;';
+    d.innerHTML = '<div style="font-weight:700;font-size:14px;color:var(--accent);">'+b.title+'</div>'
+      +'<div style="font-size:11px;color:var(--dim);margin-top:2px;">'+b.author+'</div>';
+    d.onclick = (function(idx){ return function(){ curBookIdx=idx; CHS=BOOKS[idx].chapters; navTo('reader'); renderChTabs(0); }; })(i);
+    el.appendChild(d);
+  });
 }
 
 function initQuiz() {
