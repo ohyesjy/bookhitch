@@ -1317,7 +1317,7 @@ body { display:flex; justify-content:center; }
   font-size: 0.9em;
 }
 </style>
-<!-- deploy: 1774841685 -->
+<!-- deploy: 1774841768 -->
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute">
@@ -1410,6 +1410,13 @@ body { display:flex; justify-content:center; }
 </div>
 
 <!-- MY NOTES -->
+<div id="shelf" class="screen">
+  <div style="padding:50px 20px 16px; border-bottom:0.5px solid rgba(0,0,0,0.2);">
+    <div style="font-family:var(--vt);font-size:20px;font-weight:700;color:var(--accent);letter-spacing:2px;">📚 도서목록</div>
+    <div style="font-size:11px;color:var(--green3);margin-top:4px;">내가 읽는 책들</div>
+  </div>
+  <div id="shelfFullList" style="padding:16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;"></div>
+</div>
 <div id="highlights" class="screen">
   <div class="hl-hd">
     <div class="hl-title">MY NOTES</div>
@@ -1487,8 +1494,8 @@ body { display:flex; justify-content:center; }
   <button class="n-btn" id="nav-reader" onclick="goReader()">
     <span class="n-ico">←</span><span class="n-lbl">BACK</span>
   </button>
-  <button class="n-btn" id="nav-highlights" onclick="navTo('highlights')">
-    <span class="n-ico">—</span><span class="n-lbl">MY NOTES</span>
+  <button class="n-btn" id="nav-highlights" onclick="navTo('shelf')">
+    <span class="n-ico">☰</span><span class="n-lbl">도서목록</span>
   </button>
   <button class="n-btn active" id="nav-home" onclick="navTo('home')">
     <span class="n-ico">⌂</span><span class="n-lbl">HOME</span>
@@ -3732,6 +3739,7 @@ const SRCH = [
 function navTo(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if(id==='shelf'){var el=document.getElementById('shelfFullList');if(el){el.innerHTML='';BOOKS.forEach(function(b,i){var d=document.createElement('div');d.style.cssText='padding:14px;border-bottom:0.5px solid rgba(0,0,0,0.1);cursor:pointer;display:flex;align-items:center;gap:12px;';d.innerHTML='<span style="font-size:24px">'+(b.emoji||'📖')+'</span><div><div style="font-weight:700;font-size:14px;color:var(--accent)">'+b.title+'</div><div style="font-size:11px;color:var(--dim);margin-top:2px">'+b.author+'</div></div>';d.onclick=function(){curBookIdx=i;CHS=BOOKS[i].chapters;navTo('reader');renderChTabs(0);};el.appendChild(d);});}}
   document.querySelectorAll('.n-btn').forEach(b => b.classList.remove('active'));
   const nb = document.getElementById('nav-' + id);
   if (nb) nb.classList.add('active');
