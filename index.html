@@ -1317,7 +1317,7 @@ body { display:flex; justify-content:center; }
   font-size: 0.9em;
 }
 </style>
-<!-- deploy: 1774843745 -->
+<!-- deploy: 1774843800 -->
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute">
@@ -4104,7 +4104,7 @@ function showQuiz() {
     optEl.innerHTML = '<button onclick="event.stopPropagation();revealAnswer()" style="padding:10px 20px;background:var(--accent);color:#E7F9A9;border:none;border-radius:8px;font-family:var(--mono);font-size:14px;cursor:pointer;background:rgba(255,255,255,0.15);color:#1A1A1A;border:1px solid rgba(255,255,255,0.6);box-shadow:0 2px 8px rgba(0,0,0,0.08);backdrop-filter:blur(4px)">🤔 정답 보기</button>';
   } else {
     qEl.innerHTML = quiz.q + '<br><span style="font-weight:normal;font-size:11px;color:#6A3040;">' + quiz.hint + '</span>';
-    optEl.innerHTML = '<button onclick="event.stopPropagation();revealAnswer()" style="padding:10px 20px;background:var(--accent);color:#E7F9A9;border:none;border-radius:8px;font-family:var(--mono);font-size:14px;cursor:pointer">💡 정답 확인</button>';
+    optEl.innerHTML = '<button onclick="event.stopPropagation();revealAnswer()" style="padding:10px 20px;background:rgba(255,255,255,0.15);color:#1A1A1A;border:1px solid rgba(0,0,0,0.2);border-radius:8px;font-family:var(--mono);font-size:14px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08);backdrop-filter:blur(4px)">💡 정답 확인</button>';
   }
 }
 
