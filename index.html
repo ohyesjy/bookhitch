@@ -1317,7 +1317,7 @@ body { display:flex; justify-content:center; }
   font-size: 0.9em;
 }
 </style>
-<!-- deploy: 1774840325 -->
+<!-- deploy: 1774840416 -->
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute">
@@ -1409,6 +1409,17 @@ body { display:flex; justify-content:center; }
   <div class="ch-tabs" id="chTabs"></div>
 </div>
 
+<!-- SHELF -->
+<div id="shelf" class="screen">
+  <div class="hl-hd" style="padding:50px 20px 0;">
+    <div class="hl-title" style="font-family:var(--vt);font-size:22px;color:var(--accent);letter-spacing:2px;">📚 도서목록</div>
+    <div class="hl-sub">내가 읽은 책들</div>
+  </div>
+  <div style="padding:12px 16px 8px;">
+    <div class="shelf-list" id="shelfListFull" style="display:flex;flex-direction:column;gap:12px;"></div>
+  </div>
+</div>
+
 <!-- MY NOTES -->
 <div id="highlights" class="screen">
   <div class="hl-hd">
@@ -1487,8 +1498,8 @@ body { display:flex; justify-content:center; }
   <button class="n-btn" id="nav-reader" onclick="goReader()">
     <span class="n-ico">←</span><span class="n-lbl">BACK</span>
   </button>
-  <button class="n-btn" id="nav-highlights" onclick="navTo('highlights')">
-    <span class="n-ico">—</span><span class="n-lbl">MY NOTES</span>
+  <button class="n-btn" id="nav-highlights" onclick="navTo('shelf')">
+    <span class="n-ico">☰</span><span class="n-lbl">도서목록</span>
   </button>
   <button class="n-btn active" id="nav-home" onclick="navTo('home')">
     <span class="n-ico">⌂</span><span class="n-lbl">HOME</span>
@@ -3956,6 +3967,26 @@ function getQuizSketch(type) {
   var svg = sketches[type] || sketches[keys[Math.floor(Math.random() * keys.length)]];
   svg = svg.replace(/C/g, c);
   return '<svg width="100" height="95" viewBox="0 0 100 95" fill="none">' + w + '<g filter="url(#qwob)">' + svg + '</g></svg>';
+}
+
+
+function renderShelfFull() {
+  var el = document.getElementById('shelfListFull');
+  if (!el) return;
+  el.innerHTML = '';
+  BOOKS.forEach(function(book, idx) {
+    var card = document.createElement('div');
+    card.className = 'shelf-item';
+    card.style.cssText = 'background:#fff;border-radius:8px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,0.08);cursor:pointer;display:flex;align-items:center;gap:12px;';
+    card.innerHTML = '<span style="font-size:28px;">' + (book.emoji||'📖') + '</span>' +
+      '<div style="flex:1;">' +
+        '<div style="font-family:var(--font);font-size:14px;font-weight:700;color:var(--accent);">' + book.title + '</div>' +
+        '<div style="font-size:11px;color:var(--dim);margin-top:2px;">' + (book.author||'') + '</div>' +
+        '<div style="font-size:10px;color:var(--green3);margin-top:4px;">' + (book.chapters?book.chapters.length:0) + ' chapters</div>' +
+      '</div>';
+    card.onclick = function() { curBookIdx = idx; CHS = BOOKS[idx].chapters; navTo('reader'); renderChTabs(0); };
+    el.appendChild(card);
+  });
 }
 
 function initQuiz() {
