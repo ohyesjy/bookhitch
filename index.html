@@ -1317,7 +1317,7 @@ body { display:flex; justify-content:center; }
   font-size: 0.9em;
 }
 </style>
-<!-- deploy: 1774844842 -->
+<!-- deploy: 1774844875 -->
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute">
@@ -1424,7 +1424,7 @@ body { display:flex; justify-content:center; }
 
   <!-- AI 책 생성 섹션 (상단) -->
   <div style="padding: 0 20px 20px;">
-    <input type="text" id="aiBookTitle" placeholder="책 제목..." style="
+    <input type="text" id="aiBookTitle" placeholder="책 제목..." onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('aiBookAuthor').focus();}" style="
       width: 100%; box-sizing: border-box;
       background: rgba(255,255,255,0.6);
       border: 1px solid rgba(61,8,20,0.2);
