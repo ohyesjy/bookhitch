@@ -1317,7 +1317,7 @@ body { display:flex; justify-content:center; }
   font-size: 0.9em;
 }
 </style>
-<!-- deploy: 1774844475 -->
+<!-- deploy: 1774844576 -->
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute">
@@ -4884,7 +4884,7 @@ async function generateBookWithAI() {
     if (bar) { var w = parseFloat(bar.style.width); if (w < 88) bar.style.width = (w + Math.random()*4) + '%'; }
   }, 1500);
 
-  var prompt = '책 "' + title + '"(' + (author || '미상') + '). JSON만(```없이):\n{"title":"제목","author":"저자","emoji":"이모지","genre":"장르","coreLines":["핵심명문장1(원문에 가깝게)","명문장2","명문장3"],"emotions":[{"ch":"CH.1","label":"감정","color":"#색상","h":높이}],"chapters":[{"t":"1장","s":"목차제목","body":"핵심내용","qt":"원작의 핵심 인용구(원문에 가깝게)","sm":["요약1","요약2"],"q":"논리적사고질문","ct":"비판적사고질문","lt":"논리적추론질문","fe":"이모지2개","sk":"키워드","w":[{"w":"단어","d":"뜻","e":"예문"}]}]}\n\nbody 작성 규칙:\n- 7줄 이상. 이것만 읽어도 해당 챕터를 실제로 읽은 느낌이 나야 함\n- 구체적 장면, 등장인물 이름, 핵심 대사 반드시 포함\n- 원작에 풍자/알레고리/상징이 있으면 반드시 설명 (예: 나폴레옹=스탈린, 모비딕=자연의 힘)\n- 작가가 이 장면을 통해 말하고 싶은 메시지를 마지막에 한 줄로\n- 초등 고학년 눈높이로 쉽게 설명하되 내용의 깊이는 유지\n\n전체 규칙:\n1. 실제 목차/챕터 구조를 따라 4~6개로 나누기\n2. 마지막은 isLast:true + 작가의도/결말\n3. q: 사유질문, ct: 비판적사고("정말 그럴까?" "반대로 생각하면?"), lt: 논리적추론("만약~라면?" "원인은?")\n4. w: 초등고학년이 모를 단어 2개씩. 뜻은 초등3학년도 이해할 일상 대화체\n5. qt: 원작의 실제 문장을 최대한 살려서\nsk:mountain/tree/river/sea/flower/star/moon/person/heart/tear/eye/hand/book/house/key/clock/mirror/candle/bird/fire/road/bridge/empty/temple.\n실제 책 내용만 정확히. 모르면 title에 "정보부족".';
+  var prompt = '책 "' + title + '"(' + (author || '미상') + '). JSON만(```없이):\n{"title":"제목","author":"저자","emoji":"이모지1개","genre":"장르","coreLines":["핵심문장1","핵심문장2","핵심문장3"],"chapters":[{"t":"1장","s":"챕터제목","body":"5줄 이상 핵심내용 구체적 장면 포함","qt":"핵심인용구","sm":["요약1","요약2"],"q":"사고질문","ct":"비판질문","lt":"추론질문","fe":"이모지2개","sk":"키워드","w":[{"w":"단어","d":"뜻","e":"예문"}]}]}\n챕터는 5~6개. body는 구체적 장면과 인물 포함. 실제 읽은 느낌이 나게.';
 
   try {
     var res = await fetch('/.netlify/functions/claude', {
