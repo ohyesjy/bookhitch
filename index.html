@@ -1317,7 +1317,7 @@ body { display:flex; justify-content:center; }
   font-size: 0.9em;
 }
 </style>
-<!-- deploy: 1774840474 -->
+<!-- deploy: 1774840551 -->
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute">
@@ -3741,6 +3741,7 @@ const SRCH = [
 function navTo(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if (id === 'shelf') { renderShelfFull(); }
   document.querySelectorAll('.n-btn').forEach(b => b.classList.remove('active'));
   const nb = document.getElementById('nav-' + id);
   if (nb) nb.classList.add('active');
