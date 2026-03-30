@@ -1317,7 +1317,7 @@ body { display:flex; justify-content:center; }
   font-size: 0.9em;
 }
 </style>
-<!-- deploy: 1774842670 -->
+<!-- deploy: 1774842724 -->
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute">
@@ -4040,7 +4040,7 @@ function showQuiz() {
       + '<button onclick="event.stopPropagation();answerQuiz(false)" style="padding:7px 20px;background:#FFFFFF;color:#F9E8E8;border:none;border-radius:20px;font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;letter-spacing:1px;">X 아니야</button>';
   } else if (quiz.type === 'word') {
     qEl.innerHTML = quiz.q;
-    optEl.innerHTML = '<button onclick="event.stopPropagation();revealAnswer()" style="padding:10px 20px;background:var(--accent);color:#E7F9A9;border:none;border-radius:8px;font-family:var(--mono);font-size:14px;cursor:pointer">🤔 정답 보기</button>';
+    optEl.innerHTML = '<button onclick="event.stopPropagation();revealAnswer()" style="padding:10px 20px;background:var(--accent);color:#E7F9A9;border:none;border-radius:8px;font-family:var(--mono);font-size:14px;cursor:pointer;background:transparent;border:1.5px solid rgba(0,0,0,0.25);color:var(--accent);box-shadow:2px 2px 6px rgba(0,0,0,0.1)">🤔 정답 보기</button>';
   } else {
     qEl.innerHTML = quiz.q + '<br><span style="font-weight:normal;font-size:11px;color:#6A3040;">' + quiz.hint + '</span>';
     optEl.innerHTML = '<button onclick="event.stopPropagation();revealAnswer()" style="padding:10px 20px;background:var(--accent);color:#E7F9A9;border:none;border-radius:8px;font-family:var(--mono);font-size:14px;cursor:pointer">💡 정답 확인</button>';
