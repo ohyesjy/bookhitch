@@ -26,7 +26,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'prompt is required' });
     }
 
-    // 허용 모델 목록 (기본: haiku — 빠른 생성)
     const allowedModels = {
       'haiku': 'claude-haiku-4-5-20251001',
       'sonnet': 'claude-sonnet-4-20250514'
@@ -42,7 +41,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: useModel,
-        max_tokens: 4096,
+        max_tokens: 8192,
         messages: [{ role: 'user', content: prompt }]
       })
     });
