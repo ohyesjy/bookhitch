@@ -940,9 +940,10 @@ function renderBadges() {
   var html = '';
   BADGES.forEach(function(badge) {
     var unlocked = earned.indexOf(badge.id) >= 0;
-    html += '<div style="display:inline-flex;flex-direction:column;align-items:center;width:72px;padding:8px 4px;opacity:' + (unlocked ? '1' : '0.3') + '">'
-      + '<div style="font-size:28px;margin-bottom:4px">' + badge.emoji + '</div>'
-      + '<div style="font-size:9px;font-weight:700;color:var(--accent);text-align:center">' + badge.name + '</div>'
+    html += '<div style="display:inline-flex;flex-direction:column;align-items:center;width:72px;padding:8px 4px">'
+      + '<div style="font-size:28px;margin-bottom:4px;' + (unlocked ? '' : 'filter:grayscale(1);opacity:0.5') + '">' + badge.emoji + '</div>'
+      + '<div style="font-size:9px;font-weight:700;color:' + (unlocked ? 'var(--accent)' : 'var(--dim)') + ';text-align:center">' + badge.name + '</div>'
+      + (unlocked ? '<div style="font-size:8px;color:#4CAF50;margin-top:2px">✓ 달성</div>' : '<div style="font-size:8px;color:var(--dim);margin-top:2px">🔒</div>')
       + '</div>';
   });
   el.innerHTML = html;
