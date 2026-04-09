@@ -175,6 +175,9 @@
     ">[ 책 등록하기 ]</button>
   </div>
 
+  <!-- 내 추가 도서 목록 -->
+  <div id="myCustomBooks" style="padding:0 20px 16px;"></div>
+
   <div class="srch-res" id="srchRes"></div>
 </div>
 
@@ -2666,7 +2669,7 @@ function renderShelf() {
     var book = item.book;
     var bi = item.idx;
     var prog = getBookProgress(bi);
-    var delBtn = '<div onclick="event.stopPropagation();deleteCustomBook(' + bi + ')" style="text-align:center;margin-top:6px;color:#C04040;font-size:11px;font-family:var(--mono);cursor:pointer">[ 삭제 ]</div>';
+    var delBtn = !book._builtin ? '<div onclick="event.stopPropagation();deleteCustomBook(' + bi + ')" style="text-align:center;margin-top:8px;padding:6px 0;color:#C04040;font-size:12px;font-family:var(--mono);cursor:pointer;letter-spacing:1px">✕ 삭제</div>' : '';
 
     // 카드
     out += '<div style="display:flex;align-items:center;gap:6px">';
@@ -2851,10 +2854,10 @@ function _renderShelfList() {
     d.style.cssText = 'padding:14px;border-bottom:0.5px solid rgba(0,0,0,0.1);cursor:pointer;';
     var delHtml = '';
     if (!b._builtin) {
-      delHtml = '<span onclick="event.stopPropagation();deleteCustomBook('+i+')" style="color:#C04040;font-size:11px;font-family:var(--mono);cursor:pointer;margin-left:8px">[ 삭제 ]</span>';
+      delHtml = '<span onclick="event.stopPropagation();deleteCustomBook('+i+')" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:rgba(192,64,64,0.1);color:#C04040;font-size:16px;font-weight:bold;cursor:pointer;flex-shrink:0;transition:background 0.2s" onmouseenter="this.style.background=\'rgba(192,64,64,0.25)\'" onmouseleave="this.style.background=\'rgba(192,64,64,0.1)\'">✕</span>';
     }
-    d.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;">'
-      +'<div><div style="font-weight:700;font-size:14px;color:var(--accent);">'+b.emo+' '+b.title+'</div>'
+    d.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
+      +'<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;color:var(--accent);">'+b.emo+' '+b.title+'</div>'
       +'<div style="font-size:11px;color:var(--dim);margin-top:2px;">'+b.author+'</div></div>'
       +delHtml+'</div>';
     d.onclick = (function(idx){ return function(){ curBookIdx=idx; CHS=BOOKS[idx].chapters; navTo('reader'); renderChTabs(0); }; })(i);
@@ -3759,15 +3762,42 @@ async function generateBookWithAI() {
     if (bar) bar.style.width = '92%';
 
     var text = data.content[0].text;
-    var clean = text.replace(/```json|```/g, '').trim();
-    var book = JSON.parse(clean);
+    // JSON 추출: 여러 형태 대응
+    var clean = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    // JSON 객체만 추출 (앞뒤 텍스트 제거)
+    var jsonStart = clean.indexOf('{');
+    var jsonEnd = clean.lastIndexOf('}');
+    if (jsonStart >= 0 && jsonEnd > jsonStart) {
+      clean = clean.substring(jsonStart, jsonEnd + 1);
+    }
+    var book;
+    try {
+      book = JSON.parse(clean);
+    } catch(parseErr) {
+      // 제어문자 제거 후 재시도
+      clean = clean.replace(/[\x00-\x1F\x7F]/g, ' ').replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+      book = JSON.parse(clean);
+    }
+
+    if (!book.title || !book.chapters || book.chapters.length === 0) {
+      throw new Error('AI 응답에 필수 데이터(title, chapters)가 없어요');
+    }
 
     var newId = BOOKS.length;
     book.id = newId;
     book.emo = book.emoji || '📚';
     book.coreLines = book.coreLines || [];
     book.emotions = book.emotions || [];
+    book.cast = book.cast || [];
+    book.bigQ = book.bigQ || '';
     book.chapters = book.chapters.map(function(ch, i) {
+      ch.t = ch.t || ((i+1) + '장');
+      ch.s = ch.s || ch.t;
+      ch.body = ch.body || '';
+      ch.qt = ch.qt || '';
+      ch.q = ch.q || '';
+      ch.ct = ch.ct || '';
+      ch.lt = ch.lt || '';
       ch.fe = ch.fe || '📖';
       ch.sm = ch.sm || [];
       ch.w = ch.w || [];
@@ -3778,7 +3808,7 @@ async function generateBookWithAI() {
 
     BOOKS.push(book);
     var musicPreset = generateBookMusic(newId, book.genre);
-    try { _set('bh5_custom_books', BOOKS.filter(function(b){return !b._builtin && b.id >= 11;})); } catch(e) {}
+    try { _set('bh5_custom_books', BOOKS.filter(function(b){return !b._builtin;})); } catch(e) {}
 
     clearInterval(pTimer);
     if (bar) bar.style.width = '100%';
@@ -3786,6 +3816,7 @@ async function generateBookWithAI() {
     document.getElementById('aiBookTitle').value = '';
     document.getElementById('aiBookAuthor').value = '';
     showToast('📚 ' + book.title + ' 추가 완료!');
+    renderMyCustomBooks();
     setTimeout(function() { navTo('home'); renderShelf(); }, 1200);
 
   } catch(e) {
@@ -3796,7 +3827,9 @@ async function generateBookWithAI() {
       setTimeout(function() { generateBookWithAI(); }, 3000);
       return;
     }
-    status.innerHTML = '❌ ' + e.message + '<br>다시 시도해주세요.';
+    var errMsg = e.message;
+    if (errMsg.includes('JSON')) errMsg = 'AI 응답 해석 실패 — 아래에 직접 JSON을 붙여넣어 보세요.';
+    status.innerHTML = '❌ ' + errMsg + '<br><span style="font-size:11px;color:var(--dim)">다시 시도하거나, Claude에서 직접 JSON을 받아 붙여넣기 해주세요.</span>';
     document.getElementById('aiJsonInput').style.display = 'block';
     document.getElementById('aiJsonBtn').style.display = 'block';
   } finally {
@@ -3813,20 +3846,37 @@ function applyBookJSON() {
   var jsonText = document.getElementById('aiJsonInput').value.trim();
   var status = document.getElementById('aiStatus');
   try {
-    var clean = jsonText.replace(/```json|```/g, '').trim();
+    var clean = jsonText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    var jsonStart = clean.indexOf('{');
+    var jsonEnd = clean.lastIndexOf('}');
+    if (jsonStart >= 0 && jsonEnd > jsonStart) clean = clean.substring(jsonStart, jsonEnd + 1);
     var book = JSON.parse(clean);
+    if (!book.title || !book.chapters) throw new Error('title 또는 chapters가 없어요');
     var newId = BOOKS.length;
     book.id = newId;
+    book.emo = book.emoji || book.emo || '📚';
+    book.coreLines = book.coreLines || [];
+    book.emotions = book.emotions || [];
+    book.cast = book.cast || [];
+    book.bigQ = book.bigQ || '';
     book.chapters = book.chapters.map(function(ch, i) {
+      ch.t = ch.t || ((i+1) + '장');
+      ch.s = ch.s || ch.t;
+      ch.body = ch.body || '';
+      ch.qt = ch.qt || '';
+      ch.q = ch.q || '';
+      ch.ct = ch.ct || '';
+      ch.lt = ch.lt || '';
       ch.fe = ch.fe || '📖';
       ch.sm = ch.sm || [];
       ch.w = ch.w || [];
+      ch.sk = ch.sk || 'book';
       if (i === book.chapters.length - 1) ch.isLast = true;
       return ch;
     });
     BOOKS.push(book);
     generateBookMusic(newId, book.genre || '');
-    try { _set('bh5_custom_books', BOOKS.filter(function(b){return !b._builtin && b.id >= 11;})); } catch(e) {}
+    try { _set('bh5_custom_books', BOOKS.filter(function(b){return !b._builtin;})); } catch(e) {}
     status.textContent = '✅ 완성!';
     document.getElementById('aiBookTitle').value = '';
     document.getElementById('aiBookAuthor').value = '';
@@ -3834,9 +3884,10 @@ function applyBookJSON() {
     document.getElementById('aiJsonInput').style.display = 'none';
     document.getElementById('aiJsonBtn').style.display = 'none';
     showToast('📚 ' + book.title + ' 추가 완료!');
+    renderMyCustomBooks();
     setTimeout(function() { navTo('home'); renderShelf(); }, 1000);
   } catch(e) {
-    status.textContent = '❌ JSON 형식 오류. 다시 시도해주세요.';
+    status.textContent = '❌ ' + (e.message || 'JSON 형식 오류') + ' 다시 시도해주세요.';
   }
 }
 
@@ -3845,6 +3896,25 @@ function renderSrch(q) {
   document.getElementById('srchRes').innerHTML = f.map((b, i) =>
     `<div class="res-item"><span class="res-idx">[${i}]</span><div class="res-emo">${b.e}</div><div style="flex:1"><div class="res-ttl">${b.t}</div><div class="res-auth">${b.a}</div><div class="res-genre">${b.g}</div></div><button class="res-add" onclick="showToast('ADDED')">ADD</button></div>`
   ).join('');
+  renderMyCustomBooks();
+}
+function renderMyCustomBooks() {
+  var el = document.getElementById('myCustomBooks');
+  if (!el) return;
+  var customs = [];
+  BOOKS.forEach(function(b, i) { if (!b._builtin) customs.push({book:b, idx:i}); });
+  if (customs.length === 0) { el.innerHTML = ''; return; }
+  var html = '<div style="margin-bottom:12px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:2px">MY BOOKS (' + customs.length + ')</div>';
+  customs.forEach(function(item) {
+    var b = item.book;
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 0;border-bottom:0.5px solid rgba(0,0,0,0.08)">';
+    html += '<div onclick="curBookIdx='+item.idx+';CHS=BOOKS['+item.idx+'].chapters;navTo(\'reader\');renderChTabs(0);" style="flex:1;min-width:0;cursor:pointer">';
+    html += '<div style="font-weight:700;font-size:13px;color:var(--accent)">' + (b.emo||'📚') + ' ' + b.title + '</div>';
+    html += '<div style="font-size:10px;color:var(--dim);margin-top:2px">' + b.author + ' · ' + (b.chapters?b.chapters.length:0) + '챕터</div></div>';
+    html += '<span onclick="deleteCustomBook('+item.idx+');renderMyCustomBooks();" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:rgba(192,64,64,0.1);color:#C04040;font-size:16px;font-weight:bold;cursor:pointer;flex-shrink:0">✕</span>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
 }
 function deleteCustomBook(idx) {
   var book = BOOKS[idx];
@@ -3854,10 +3924,11 @@ function deleteCustomBook(idx) {
   // Re-assign IDs
   BOOKS.forEach(function(b, i) { b.id = i; });
   // Save custom books
-  try { _set('bh5_custom_books', BOOKS.slice(11).filter(function(b) { return !b._builtin; })); } catch(e) {}
+  try { _set('bh5_custom_books', BOOKS.filter(function(b) { return !b._builtin; })); } catch(e) {}
   renderShelf();
   renderToday();
   _renderShelfList();
+  renderMyCustomBooks();
   showToast('"' + book.title + '" 삭제됨');
 }
 
