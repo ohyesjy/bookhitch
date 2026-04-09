@@ -44,6 +44,7 @@
       </div>
       
     </div>
+    <div id="continueReading" style="display:none"></div>
     <div class="sec fu2" style="display:none">// TODAY</div>
     <div class="today-wrap fu2">
       <div class="today-block" onclick="goReader()" id="todayBlock">
@@ -63,10 +64,24 @@
         <div style="margin-top:12px; font-size:11px; color:var(--green3); letter-spacing:1px;">TAP FOR NEXT QUIZ →</div>
       </div>
     </div>
+    <div id="bookmarkList" style="padding:0 20px;margin-top:8px"></div>
     <div class="sec fu4" style="display:none">// 네 도서목록</div>
     <div class="shelf-wrap fu4">
       <div class="shelf-list" id="shelfList"></div>
     </div>
+    <!-- 독서 통계 -->
+    <div class="sec">// 📊 나의 독서</div>
+    <div style="padding:0 20px 16px">
+      <div id="statsPanel"></div>
+      <div id="badgeList" style="margin-top:12px;text-align:center"></div>
+    </div>
+
+    <!-- 테마별 추천 -->
+    <div class="sec">// 🏷️ 테마별 도서</div>
+    <div style="padding:0 20px 16px">
+      <div id="themeGroups"></div>
+    </div>
+
     <div class="sec">// MENU</div>
     <div class="menu-wrap">
       <button class="menu-item" onclick="navTo('highlights')">
@@ -74,9 +89,6 @@
         <div><div class="menu-label">내 노트</div><div class="menu-sub">질문 &amp; 답변</div></div>
         <span class="menu-arr">▶</span>
       </button>
-
-
-
     </div>
   </div>
 </div>
@@ -87,7 +99,7 @@
     <div class="r-nav">
       <button class="back-btn" onclick="navTo('home')">BACK</button>
       <div class="r-title" id="rTitle" onclick="navTo('home')" style="cursor:pointer">은하수를 여행하는 히치하이커</div>
-      <div style="width:50px"></div>
+      <button id="bookmarkBtn" onclick="toggleBookmark()" style="background:none;border:none;font-size:20px;cursor:pointer;padding:4px 8px;opacity:0.6">☆</button>
     </div>
     <button class="cast-toggle" id="castToggle" onclick="toggleCast()">
       CAST <span class="cast-arrow">▼</span>
@@ -109,8 +121,10 @@
 </div>
 <div id="highlights" class="screen">
   <div class="hl-hd">
-    <div class="hl-title">MY NOTES</div>
-    <div class="hl-sub">질문과 내 답변 모음</div>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div><div class="hl-title">MY NOTES</div><div class="hl-sub">질문과 내 답변 모음</div></div>
+      <button onclick="shareHighlights()" style="background:rgba(61,8,20,0.08);border:none;border-radius:8px;padding:8px 14px;font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;letter-spacing:1px">공유하기 →</button>
+    </div>
     <div id="hlConBar" style="display:flex;gap:4px;overflow-x:auto;padding:8px 0 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;"></div>
     <div class="hl-tabs" id="hlTabs"></div>
   </div>
@@ -267,6 +281,10 @@ window.addEventListener('load', function() {
   } catch(e) { console.warn('Custom books load error', e); }
 
   try { renderMyCustomBooks(); } catch(e) { console.warn('renderMyCustomBooks error', e); }
+  try { renderBookmarks(); } catch(e) { console.warn('renderBookmarks error', e); }
+  try { renderStats(); } catch(e) { console.warn('renderStats error', e); }
+  try { renderBadges(); } catch(e) { console.warn('renderBadges error', e); }
+  try { renderThemeGroups(); } catch(e) { console.warn('renderThemeGroups error', e); }
   try { renderShelf(); }     catch(e) { console.warn('renderShelf error', e); }
   try { renderToday(); }     catch(e) { console.warn('renderToday error', e); }
   try { renderChTabs(0); }   catch(e) { console.warn('renderChTabs error', e); }

@@ -14,7 +14,7 @@ function navTo(id) {
   if (nb) nb.classList.add('active');
   if (id === 'addbook')    renderSrch('');
   if (id === 'highlights') renderHL();
-  if (id === 'home')       { renderToday(); renderShelf(); }
+  if (id === 'home')       { renderToday(); renderShelf(); renderStats(); renderBadges(); renderBookmarks(); }
   // 챕터탭은 reader 화면에서만 표시
   var chTabs = document.getElementById('chTabs');
   if (chTabs) chTabs.style.display = (id === 'reader') ? 'flex' : 'none';
@@ -262,6 +262,25 @@ function renderToday() {
   var cIdx = (last && typeof last.c === 'number' && BOOKS[bIdx] && BOOKS[bIdx].chapters[last.c]) ? last.c : 0;
   var book = BOOKS[bIdx];
   var ch   = book.chapters[cIdx];
+
+  // ── 이어읽기 리마인더 배너 ──
+  var contEl = document.getElementById('continueReading');
+  if (contEl && last) {
+    var lastTime = _get('bh5_last_time', 0);
+    var daysDiff = (Date.now() - lastTime) / (1000 * 60 * 60 * 24);
+    var prog = getBookProgress(bIdx);
+    if (lastTime > 0 && daysDiff <= 7 && !prog.isDone) {
+      contEl.style.display = 'block';
+      contEl.innerHTML = '<div onclick="curBookIdx='+bIdx+';CHS=BOOKS['+bIdx+'].chapters;navTo(\'reader\');renderChTabs('+cIdx+');" style="margin:12px 20px 0;padding:14px 16px;background:rgba(61,8,20,0.06);border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:10px">'
+        + '<span style="font-size:24px">' + book.emo + '</span>'
+        + '<div style="flex:1"><div style="font-family:var(--font);font-size:13px;font-weight:700;color:var(--accent)">' + book.title + ' 이어서 읽기</div>'
+        + '<div style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:2px">' + ch.t + ' · ' + prog.status + ' 진행</div></div>'
+        + '<span style="font-size:16px;color:var(--accent)">→</span></div>';
+    } else {
+      contEl.style.display = 'none';
+    }
+  }
+
   var pre   = document.getElementById('todayPre');
   var title = document.getElementById('todayTitle');
   var book2 = document.getElementById('todayBook');
@@ -524,11 +543,19 @@ function loadCh(idx, tabEl) {
   curChIdx = idx;
   CHS = BOOKS[curBookIdx].chapters;
   // 마지막 읽은 책+챕터 저장
-  try { _set('bh5_last', {b: curBookIdx, c: idx}); } catch(e) {}
+  try { _set('bh5_last', {b: curBookIdx, c: idx}); _set('bh5_last_time', Date.now()); } catch(e) {}
+  updateBookmarkBtn();
   // 읽은 챕터 기록 (진행도 자동 계산용)
   var readKey = 'bh5_read_b' + curBookIdx;
   var readSet = _get(readKey, []);
-  if (readSet.indexOf(idx) === -1) { readSet.push(idx); _set(readKey, readSet); }
+  if (readSet.indexOf(idx) === -1) {
+    readSet.push(idx); _set(readKey, readSet);
+    checkAchievements();
+    // 완독 체크
+    if (readSet.length >= BOOKS[curBookIdx].chapters.length) {
+      setTimeout(function() { showCompletionScreen(curBookIdx); }, 500);
+    }
+  }
   document.querySelectorAll('.ch-tab').forEach(t => t.classList.remove('active'));
   if (tabEl) tabEl.classList.add('active');
   const ch = CHS[idx];
@@ -544,7 +571,7 @@ function loadCh(idx, tabEl) {
   body.innerHTML =
     `<div class="ch-eyebrow fu">${ch.t}</div>` +
     `<div class="ch-title fu">${ch.s}</div>` +
-    `<div class="ch-sub fu2">${BOOKS[curBookIdx].title} · ${BOOKS[curBookIdx].author}</div>` +
+    `<div class="ch-sub fu2">${BOOKS[curBookIdx].title} · <span onclick="showAuthorInfo('${BOOKS[curBookIdx].author}')" style="text-decoration:underline;cursor:pointer">${BOOKS[curBookIdx].author}</span></div>` +
     `<div class="funny-box fu2"><span class="funny-emo">${ch.fe}</span><div class="funny-cap">// CHAPTER VISUAL</div></div>` +
     `<div class="story-text fu3">${storyHTML}</div>` +
     `<div class="quote-line fu3">${ch.qt}</div>` +
@@ -689,4 +716,260 @@ function showWord(w, d, e) {
 function closePop() {
   document.getElementById('wordPop').classList.remove('show');
   document.getElementById('overlay').classList.remove('show');
+}
+
+// ══ HIGHLIGHT SHARE ══════════════════════════
+
+function shareHighlights() {
+  var bookId = (typeof hlActiveBook !== 'undefined' && hlActiveBook >= 0) ? hlActiveBook : null;
+  if (bookId === null) { showToast('도서를 먼저 선택해주세요'); return; }
+  var book = BOOKS[bookId];
+  if (!book) return;
+  var ans = _get('bh5_ans', {});
+  var text = '📚 ' + book.emo + ' ' + book.title + ' — ' + book.author + '\n\n';
+  var hasContent = false;
+  book.chapters.forEach(function(ch, i) {
+    var key = 'b' + bookId + '*' + i;
+    if (ans[key]) {
+      text += '▸ ' + ch.t + '\n';
+      text += '  Q: ' + ch.q + '\n';
+      text += '  A: ' + ans[key] + '\n\n';
+      hasContent = true;
+    }
+  });
+  if (!hasContent) { showToast('아직 기록한 답변이 없어요'); return; }
+  text += '— BookHitch에서 읽은 기록 📖';
+  if (navigator.share) {
+    navigator.share({ title: book.title + ' 독서 노트', text: text }).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(text).then(function() { showToast('클립보드에 복사됨!'); }).catch(function() { showToast('복사 실패'); });
+  }
+}
+
+// ══ BOOKMARK SYSTEM ══════════════════════════
+
+function getBookmarks() { return _get('bh5_bookmarks', []); }
+
+function isBookmarked(bookIdx, chIdx) {
+  return getBookmarks().some(function(bm) { return bm.bookIdx === bookIdx && bm.chapterIdx === chIdx; });
+}
+
+function toggleBookmark() {
+  var bms = getBookmarks();
+  var exists = bms.findIndex(function(bm) { return bm.bookIdx === curBookIdx && bm.chapterIdx === curChIdx; });
+  if (exists >= 0) {
+    bms.splice(exists, 1);
+    showToast('북마크 해제');
+  } else {
+    bms.unshift({ bookIdx: curBookIdx, chapterIdx: curChIdx, title: BOOKS[curBookIdx].title, chapter: CHS[curChIdx].t, emo: BOOKS[curBookIdx].emo, date: Date.now() });
+    if (bms.length > 20) bms.pop();
+    showToast('북마크 저장 🔖');
+  }
+  _set('bh5_bookmarks', bms);
+  updateBookmarkBtn();
+}
+
+function updateBookmarkBtn() {
+  var btn = document.getElementById('bookmarkBtn');
+  if (!btn) return;
+  if (isBookmarked(curBookIdx, curChIdx)) {
+    btn.textContent = '★';
+    btn.style.opacity = '1';
+    btn.style.color = '#D4A017';
+  } else {
+    btn.textContent = '☆';
+    btn.style.opacity = '0.6';
+    btn.style.color = 'inherit';
+  }
+}
+
+function renderBookmarks() {
+  var el = document.getElementById('bookmarkList');
+  if (!el) return;
+  var bms = getBookmarks();
+  if (bms.length === 0) { el.innerHTML = ''; return; }
+  var html = '<div style="font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px;margin-bottom:8px">BOOKMARKS</div>';
+  bms.slice(0, 5).forEach(function(bm) {
+    html += '<div onclick="curBookIdx='+bm.bookIdx+';CHS=BOOKS['+bm.bookIdx+'].chapters;navTo(\'reader\');renderChTabs('+bm.chapterIdx+');" style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:0.5px solid rgba(0,0,0,0.06);cursor:pointer">'
+      + '<span style="font-size:18px">' + (bm.emo || '📚') + '</span>'
+      + '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--accent)">' + bm.title + '</div>'
+      + '<div style="font-size:10px;color:var(--dim);margin-top:1px">' + bm.chapter + '</div></div>'
+      + '<span onclick="event.stopPropagation();removeBookmark('+bm.bookIdx+','+bm.chapterIdx+')" style="color:#C04040;font-size:14px;cursor:pointer;padding:4px">✕</span></div>';
+  });
+  el.innerHTML = html;
+}
+
+function removeBookmark(bookIdx, chIdx) {
+  var bms = getBookmarks().filter(function(bm) { return !(bm.bookIdx === bookIdx && bm.chapterIdx === chIdx); });
+  _set('bh5_bookmarks', bms);
+  renderBookmarks();
+  updateBookmarkBtn();
+  showToast('북마크 해제');
+}
+
+// ══ AUTHOR INFO POPUP ══════════════════════════
+
+function showAuthorInfo(authorName) {
+  var info = (typeof AUTHOR_INFO !== 'undefined') ? AUTHOR_INFO[authorName] : null;
+  if (!info) { showToast('작가 정보가 없습니다'); return; }
+  var html = '<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px" onclick="this.remove()">'
+    + '<div onclick="event.stopPropagation()" style="background:#FFFDF5;border-radius:16px;padding:28px;max-width:360px;width:100%;max-height:80vh;overflow-y:auto">'
+    + '<div style="font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px;margin-bottom:12px">AUTHOR</div>'
+    + '<div style="font-family:var(--font);font-size:20px;font-weight:900;color:var(--accent);margin-bottom:4px">' + authorName + '</div>'
+    + '<div style="font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:14px">' + info.country + ' · ' + info.born + (info.died ? '–' + info.died : '–') + '</div>'
+    + '<div style="font-family:var(--font);font-size:13px;color:#2A0510;line-height:1.8;margin-bottom:16px">' + info.bio + '</div>'
+    + '<div style="font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px;margin-bottom:8px">WORKS</div>'
+    + info.works.map(function(w) { return '<span style="display:inline-block;background:rgba(61,8,20,0.06);border-radius:6px;padding:4px 10px;margin:2px 4px 2px 0;font-size:12px;color:var(--accent)">' + w + '</span>'; }).join('')
+    + '<div onclick="this.parentElement.parentElement.remove()" style="text-align:center;margin-top:20px;font-family:var(--mono);font-size:11px;color:var(--dim);cursor:pointer;letter-spacing:2px">[ CLOSE ]</div>'
+    + '</div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+// ══ THEME GROUPS ══════════════════════════
+
+function renderThemeGroups() {
+  var el = document.getElementById('themeGroups');
+  if (!el || typeof THEME_GROUPS === 'undefined') return;
+  var html = '';
+  THEME_GROUPS.forEach(function(g) {
+    var bookHtml = '';
+    g.books.forEach(function(title) {
+      var book = BOOKS.find(function(b) { return b.title === title || b.title.indexOf(title) >= 0; });
+      if (book) {
+        bookHtml += '<span onclick="curBookIdx='+book.id+';CHS=BOOKS['+book.id+'].chapters;navTo(\'reader\');renderChTabs(0);" style="display:inline-block;background:rgba(61,8,20,0.06);border-radius:8px;padding:6px 10px;margin:3px;font-size:11px;color:var(--accent);cursor:pointer">' + book.emo + ' ' + book.title.substring(0,8) + '</span>';
+      }
+    });
+    if (bookHtml) {
+      html += '<div style="margin-bottom:16px">'
+        + '<div style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:4px">' + g.emoji + ' ' + g.theme + '</div>'
+        + '<div style="font-size:11px;color:var(--dim);margin-bottom:8px">' + g.desc + '</div>'
+        + '<div>' + bookHtml + '</div></div>';
+    }
+  });
+  el.innerHTML = html;
+}
+
+// ══ COMPLETION & RECOMMENDATIONS ══════════════════════════
+
+function showCompletionScreen(bookIdx) {
+  var book = BOOKS[bookIdx];
+  if (!book) return;
+  var recs = (typeof BOOK_RECS !== 'undefined') ? (BOOK_RECS[book.title] || []) : [];
+  var recHtml = '';
+  recs.forEach(function(title) {
+    var rb = BOOKS.find(function(b) { return b.title === title || b.title.indexOf(title) >= 0; });
+    if (rb) {
+      recHtml += '<div onclick="curBookIdx='+rb.id+';CHS=BOOKS['+rb.id+'].chapters;navTo(\'reader\');renderChTabs(0);document.getElementById(\'completionModal\').remove();" style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(61,8,20,0.04);border-radius:10px;margin-bottom:8px;cursor:pointer">'
+        + '<span style="font-size:24px">' + rb.emo + '</span>'
+        + '<div><div style="font-size:13px;font-weight:700;color:var(--accent)">' + rb.title + '</div>'
+        + '<div style="font-size:11px;color:var(--dim)">' + rb.author + '</div></div></div>';
+    }
+  });
+
+  var html = '<div id="completionModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px">'
+    + '<div style="background:#FFFDF5;border-radius:20px;padding:32px;max-width:360px;width:100%;text-align:center">'
+    + '<div style="font-size:48px;margin-bottom:12px">🎉</div>'
+    + '<div style="font-family:var(--font);font-size:20px;font-weight:900;color:var(--accent);margin-bottom:4px">' + book.title + '</div>'
+    + '<div style="font-family:var(--font);font-size:14px;color:var(--dim);margin-bottom:20px">완독을 축하합니다!</div>'
+    + (recHtml ? '<div style="text-align:left;margin-bottom:16px"><div style="font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px;margin-bottom:10px">NEXT BOOK</div>' + recHtml + '</div>' : '')
+    + '<div onclick="document.getElementById(\'completionModal\').remove()" style="font-family:var(--mono);font-size:12px;color:var(--dim);cursor:pointer;letter-spacing:2px;padding:12px">[ CLOSE ]</div>'
+    + '</div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+  checkAchievements();
+}
+
+// ══ ACHIEVEMENT / BADGE SYSTEM ══════════════════════════
+
+var BADGES = [
+  {id:'first_read', name:'첫 발걸음', emoji:'👣', desc:'첫 번째 챕터를 읽었어요', check: function() { return getTotalReadChapters() >= 1; }},
+  {id:'book_done', name:'완독가', emoji:'📕', desc:'첫 번째 책을 완독했어요', check: function() { return getCompletedBooks() >= 1; }},
+  {id:'five_books', name:'다독가', emoji:'📚', desc:'5권의 책을 완독했어요', check: function() { return getCompletedBooks() >= 5; }},
+  {id:'ten_chapters', name:'꾸준한 독서가', emoji:'🔥', desc:'10개 챕터를 읽었어요', check: function() { return getTotalReadChapters() >= 10; }},
+  {id:'note_writer', name:'생각하는 독서', emoji:'✍️', desc:'5개 이상의 사유 답변을 남겼어요', check: function() { return getTotalAnswers() >= 5; }},
+  {id:'bookworm', name:'북웜', emoji:'🐛', desc:'50개 챕터를 읽었어요', check: function() { return getTotalReadChapters() >= 50; }},
+  {id:'all_genres', name:'장르 탐험가', emoji:'🗺️', desc:'3개 이상의 장르를 경험했어요', check: function() { return getReadGenres() >= 3; }}
+];
+
+function getTotalReadChapters() {
+  var total = 0;
+  BOOKS.forEach(function(b, i) { total += _get('bh5_read_b' + i, []).length; });
+  return total;
+}
+
+function getCompletedBooks() {
+  var count = 0;
+  BOOKS.forEach(function(b, i) {
+    var read = _get('bh5_read_b' + i, []);
+    if (b.chapters && read.length >= b.chapters.length) count++;
+  });
+  return count;
+}
+
+function getTotalAnswers() {
+  var ans = _get('bh5_ans', {});
+  return Object.keys(ans).length;
+}
+
+function getReadGenres() {
+  var genres = {};
+  BOOKS.forEach(function(b, i) {
+    if (_get('bh5_read_b' + i, []).length > 0 && b.genre) genres[b.genre] = true;
+  });
+  return Object.keys(genres).length;
+}
+
+function checkAchievements() {
+  var earned = _get('bh5_badges', []);
+  var newBadges = [];
+  BADGES.forEach(function(badge) {
+    if (earned.indexOf(badge.id) < 0 && badge.check()) {
+      earned.push(badge.id);
+      newBadges.push(badge);
+    }
+  });
+  if (newBadges.length > 0) {
+    _set('bh5_badges', earned);
+    newBadges.forEach(function(b) { showToast(b.emoji + ' ' + b.name + ' 배지 획득!'); });
+  }
+}
+
+function renderBadges() {
+  var el = document.getElementById('badgeList');
+  if (!el) return;
+  var earned = _get('bh5_badges', []);
+  var html = '';
+  BADGES.forEach(function(badge) {
+    var unlocked = earned.indexOf(badge.id) >= 0;
+    html += '<div style="display:inline-flex;flex-direction:column;align-items:center;width:72px;padding:8px 4px;opacity:' + (unlocked ? '1' : '0.3') + '">'
+      + '<div style="font-size:28px;margin-bottom:4px">' + badge.emoji + '</div>'
+      + '<div style="font-size:9px;font-weight:700;color:var(--accent);text-align:center">' + badge.name + '</div>'
+      + '</div>';
+  });
+  el.innerHTML = html;
+}
+
+// ══ READING STATS DASHBOARD ══════════════════════════
+
+function renderStats() {
+  var el = document.getElementById('statsPanel');
+  if (!el) return;
+  var totalChapters = getTotalReadChapters();
+  var completedBooks = getCompletedBooks();
+  var totalAnswers = getTotalAnswers();
+  var totalBooks = BOOKS.length;
+
+  el.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    + '<div style="background:rgba(61,8,20,0.04);border-radius:12px;padding:16px;text-align:center">'
+    + '<div style="font-size:28px;font-weight:900;color:var(--accent)">' + completedBooks + '</div>'
+    + '<div style="font-size:10px;color:var(--dim);font-family:var(--mono);letter-spacing:1px">완독</div></div>'
+    + '<div style="background:rgba(61,8,20,0.04);border-radius:12px;padding:16px;text-align:center">'
+    + '<div style="font-size:28px;font-weight:900;color:var(--accent)">' + totalChapters + '</div>'
+    + '<div style="font-size:10px;color:var(--dim);font-family:var(--mono);letter-spacing:1px">챕터</div></div>'
+    + '<div style="background:rgba(61,8,20,0.04);border-radius:12px;padding:16px;text-align:center">'
+    + '<div style="font-size:28px;font-weight:900;color:var(--accent)">' + totalAnswers + '</div>'
+    + '<div style="font-size:10px;color:var(--dim);font-family:var(--mono);letter-spacing:1px">사유 답변</div></div>'
+    + '<div style="background:rgba(61,8,20,0.04);border-radius:12px;padding:16px;text-align:center">'
+    + '<div style="font-size:28px;font-weight:900;color:var(--accent)">' + Math.round((completedBooks/totalBooks)*100) + '%</div>'
+    + '<div style="font-size:10px;color:var(--dim);font-family:var(--mono);letter-spacing:1px">전체 진행</div></div>'
+    + '</div>';
 }
