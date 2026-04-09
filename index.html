@@ -789,7 +789,24 @@ function getSayuSketch(bookIdx, chIdx) {
         'empty': '<circle cx="110" cy="55" r="40" stroke="C" stroke-width="1.5" fill="none" stroke-dasharray="6 4" opacity="0.4"/><text x="95" y="60" font-family="serif" font-size="14" fill="C" opacity="0.3">&#8709;</text>',
         'temple': '<path d="M50 40 L110 15 L170 40" stroke="C" stroke-width="2" fill="none"/><line x1="65" y1="40" x2="65" y2="85" stroke="C" stroke-width="2"/><line x1="95" y1="40" x2="95" y2="85" stroke="C" stroke-width="2"/><line x1="125" y1="40" x2="125" y2="85" stroke="C" stroke-width="2"/><line x1="155" y1="40" x2="155" y2="85" stroke="C" stroke-width="2"/><line x1="50" y1="85" x2="170" y2="85" stroke="C" stroke-width="2"/>'
       };
-      var svg = (skLib[ch.sk] || skLib['book']).replace(/C/g, c);
+      // 한국어 키워드 → 영어 매핑
+      var skMap = {
+        '고독':'moon','도전':'mountain','인내':'fire','승리':'star','존엄':'bridge',
+        '바다':'sea','강':'river','산':'mountain','꽃':'flower','별':'star',
+        '달':'moon','사람':'person','사랑':'heart','눈물':'tear','눈':'eye',
+        '손':'hand','책':'book','집':'house','열쇠':'key','시간':'clock',
+        '거울':'mirror','초':'candle','새':'bird','불':'fire','길':'road',
+        '다리':'bridge','절':'temple','비어있음':'empty','나무':'tree',
+        '성장':'tree','모험':'mountain','우정':'heart','가족':'house',
+        '죽음':'candle','자유':'bird','전쟁':'fire','평화':'flower',
+        '정의':'temple','희망':'star','슬픔':'tear','분노':'fire',
+        '공포':'eye','용기':'mountain','지혜':'book','꿈':'moon',
+        '여행':'road','이별':'tear','만남':'bridge','변화':'river',
+        '운명':'clock','진실':'mirror','거짓':'mirror','선':'star','악':'fire',
+        '권력':'key','자연':'tree','도시':'house','바닷가':'sea'
+      };
+      var mappedSk = skMap[ch.sk] || ch.sk;
+      var svg = (skLib[mappedSk] || skLib['book']).replace(/C/g, c);
       var label = (ch.s || '').length > 10 ? (ch.s || '').slice(0,10) + '…' : (ch.s || '');
       return '<div class="sayu-sketch"><svg width="220" height="115" viewBox="0 0 220 115" fill="none">' + w + '<g filter="url(#wob)">' + svg + '<text x="30" y="108" font-family="serif" font-size="8" fill="' + c + '" opacity="0.5">' + label + '</text></g></svg></div>';
     }
