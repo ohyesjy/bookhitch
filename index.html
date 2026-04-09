@@ -3722,71 +3722,61 @@ function generateBookMusic(bookId, genre) {
   return preset;
 }
 
-// ── AI 도서 생성: 2단계 방식 ──
-// Step 1: 책 구조 + 메타데이터 (15초)
-// Step 2: 권별 상세 챕터 내용 (각 30초)
-async function _aiCall(prompt, retries) {
-  if (retries === undefined) retries = 1;
-  for (var attempt = 0; attempt <= retries; attempt++) {
-    try {
-      var controller = new AbortController();
-      var tm = setTimeout(function() { controller.abort(); }, 58000);
-      var res = await fetch('/api/claude', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: prompt }),
-        signal: controller.signal
-      });
-      clearTimeout(tm);
-      if (!res.ok) {
-        if ((res.status === 504 || res.status === 503) && attempt < retries) {
-          console.log('⏳ 재시도 ' + (attempt+1) + '/' + retries);
-          await new Promise(function(r){ setTimeout(r, 2000); });
-          continue;
-        }
-        throw new Error('서버 오류: ' + res.status);
-      }
-      var data = await res.json();
-      if (!data.content || !data.content[0]) throw new Error('AI 응답이 비어있어요');
-      var text = data.content[0].text;
-      var clean = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-      var s = clean.indexOf('{'), e = clean.lastIndexOf('}');
-      if (s >= 0 && e > s) clean = clean.substring(s, e + 1);
-      try { return JSON.parse(clean); }
-      catch(pe) {
-        clean = clean.replace(/[\x00-\x1F\x7F]/g, ' ').replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
-        return JSON.parse(clean);
-      }
-    } catch(err) {
-      if ((err.name === 'AbortError' || err.message.includes('504')) && attempt < retries) {
-        console.log('⏳ 타임아웃 재시도 ' + (attempt+1) + '/' + retries);
-        await new Promise(function(r){ setTimeout(r, 2000); });
-        continue;
-      }
-      throw err;
-    }
+// ── AI 도서 생성: 단일 호출 + 다음 권 버튼 ──
+async function _aiCall(prompt, model) {
+  var controller = new AbortController();
+  var tm = setTimeout(function() { controller.abort(); }, 58000);
+  var res = await fetch('/api/claude', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: prompt, model: model || 'sonnet' }),
+    signal: controller.signal
+  });
+  clearTimeout(tm);
+  if (!res.ok) throw new Error('서버 오류: ' + res.status);
+  var data = await res.json();
+  if (!data.content || !data.content[0]) throw new Error('AI 응답이 비어있어요');
+  var text = data.content[0].text;
+  var clean = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+  var s = clean.indexOf('{'), e = clean.lastIndexOf('}');
+  if (s >= 0 && e > s) clean = clean.substring(s, e + 1);
+  try { return JSON.parse(clean); }
+  catch(pe) {
+    clean = clean.replace(/[\x00-\x1F\x7F]/g, ' ').replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+    return JSON.parse(clean);
   }
 }
 
-function _normalizeChapter(ch, i, total) {
-  ch.t = ch.t || ((i+1) + '장');
-  ch.s = ch.s || ch.t;
-  ch.body = ch.body || '';
-  ch.qt = ch.qt || '';
-  ch.q = ch.q || '';
-  ch.ct = ch.ct || '';
-  ch.lt = ch.lt || '';
-  ch.fe = ch.fe || '📖';
-  ch.sm = ch.sm || [];
-  ch.w = ch.w || [];
+function _normCh(ch, i, total) {
+  ch.t = ch.t || ((i+1) + '장'); ch.s = ch.s || ch.t;
+  ch.body = ch.body || ''; ch.qt = ch.qt || '';
+  ch.q = ch.q || ''; ch.ct = ch.ct || ''; ch.lt = ch.lt || '';
+  ch.fe = ch.fe || '📖'; ch.sm = ch.sm || []; ch.w = ch.w || [];
   ch.sk = ch.sk || 'book';
   if (i === total - 1) ch.isLast = true;
   return ch;
 }
 
-async function generateBookWithAI() {
-  var title = document.getElementById('aiBookTitle').value.trim();
-  var author = document.getElementById('aiBookAuthor').value.trim();
+function _registerBook(book) {
+  book.id = BOOKS.length;
+  book.emo = book.emoji || book.emo || '📚';
+  book.coreLines = book.coreLines || [];
+  book.emotions = book.emotions || [];
+  book.cast = book.cast || [];
+  book.bigQ = book.bigQ || '';
+  book.chapters = (book.chapters || []).map(function(ch, i) {
+    return _normCh(ch, i, book.chapters.length);
+  });
+  BOOKS.push(book);
+  generateBookMusic(book.id, book.genre || '');
+  try { _set('bh5_custom_books', BOOKS.filter(function(b){return !b._builtin;})); } catch(e) {}
+  return book;
+}
+
+async function generateBookWithAI(volOverride) {
+  var title = volOverride ? volOverride.title : document.getElementById('aiBookTitle').value.trim();
+  var author = volOverride ? volOverride.author : document.getElementById('aiBookAuthor').value.trim();
+  var volNum = volOverride ? volOverride.vol : 1;
   var statusEl = document.getElementById('aiStatus');
   var genBtn = document.querySelector('[onclick="generateBookWithAI()"]');
 
@@ -3794,110 +3784,85 @@ async function generateBookWithAI() {
   if (genBtn) { genBtn.disabled = true; genBtn.style.opacity = '0.5'; }
 
   var authorStr = author || '미상';
+  var volLabel = volNum > 1 ? ' ('+volNum+'권 생성 중)' : '';
 
-  // ── 프로그레스 바 ──
-  function setProgress(pct, msg) {
-    statusEl.innerHTML = '<div style="margin-bottom:8px">' + msg + '</div>'
-      + '<div style="width:100%;height:6px;background:rgba(0,0,0,0.16);border-radius:3px;overflow:hidden">'
-      + '<div style="width:' + pct + '%;height:100%;background:linear-gradient(90deg,#3d0814,#E7F9A9);border-radius:3px;transition:width 0.5s"></div></div>';
-  }
+  statusEl.innerHTML = '<div style="margin-bottom:8px">📚 AI가 분석 중...' + volLabel + '</div>'
+    + '<div style="width:100%;height:6px;background:rgba(0,0,0,0.16);border-radius:3px;overflow:hidden">'
+    + '<div id="aiProg" style="width:5%;height:100%;background:linear-gradient(90deg,#3d0814,#E7F9A9);border-radius:3px;transition:width 0.5s"></div></div>';
+  var pTimer = setInterval(function() {
+    var bar = document.getElementById('aiProg');
+    if (bar) { var w = parseFloat(bar.style.width); if (w < 90) bar.style.width = (w + Math.random()*3) + '%'; }
+  }, 1500);
+
+  var volPart = volNum > 1
+    ? volNum + '권 내용을 생성해. 앞 권 내용 이후 이어지는 부분.'
+    : '긴 책이면 앞부분만(vol:1,totalVol:총권수). 짧은 책은 전체(vol:1,totalVol:1).';
+
+  var prompt = title + '(' + authorStr + '). JSON만(```없이). 원작기반. 5챕터. ' + volPart + '\n'
+    + 'body:4~5줄(무슨일+감정변화+왜중요). 초등고학년수준.\n'
+    + '{"title":"","author":"","emoji":"","genre":"","vol":'+volNum+',"totalVol":1,"volTitle":"부제","coreLines":["","",""],"bigQ":"","cast":[{"name":"","role":"","emo":"","desc":""}],"emotions":[{"ch":"1장","label":"","color":"#hex","h":50},{"ch":"2장","label":"","color":"#hex","h":60}],"chapters":[{"t":"1장","s":"","body":"4~5줄","qt":"","sm":["","",""],"q":"사유질문","ct":"비판적사고","lt":"논리추론","fe":"이모지2개","sk":"키워드","w":[{"w":"","d":"","e":""}]}]}';
 
   try {
-    // ── STEP 1: 책 구조 분석 ──
-    setProgress(5, '📖 Step 1/2 — 책 구조 분석 중... (최대 40초)');
+    var book = await _aiCall(prompt, 'sonnet');
+    clearInterval(pTimer);
 
-    var structPrompt = '책 "' + title + '"(' + authorStr + '). JSON만. 원작 기반. 짧은 책=1권, 긴 책=5챕터씩 분권.\n'
-      + '{"title":"","author":"","emoji":"","genre":"","totalVol":1,"vols":[{"vol":1,"volTitle":"","chapters":["제목1","제목2"]}],"cast":[{"name":"","role":"","emo":"","desc":""}],"coreLines":["","",""],"bigQ":""}';
+    if (!book.chapters || book.chapters.length === 0) throw new Error('AI가 챕터를 생성하지 못했어요');
 
-    var struct = await _aiCall(structPrompt, 1);
-    if (!struct.title || !struct.vols || struct.vols.length === 0) throw new Error('책 구조 분석 실패');
+    // 분권 시 제목에 권수 표시
+    var totalVol = book.totalVol || 1;
+    var curVol = book.vol || volNum;
+    if (totalVol > 1) book.title = book.title.replace(/ \d+권$/, '') + ' ' + curVol + '권';
 
-    var totalVol = struct.totalVol || struct.vols.length;
-    console.log('📖 구조 분석:', struct.title, '/ ' + totalVol + '권');
-    setProgress(20, '📖 구조 분석 완료! ' + totalVol + '권 · ' + struct.vols.reduce(function(a,v){return a+v.chapters.length;},0) + '챕터');
+    _registerBook(book);
+    console.log('✅ 도서 추가:', book.title, book.chapters.length + '챕터 / 총', BOOKS.length, '권');
 
-    // ── STEP 2: 권별 상세 생성 ──
-    var allBooks = [];
-    for (var vi = 0; vi < struct.vols.length; vi++) {
-      var vol = struct.vols[vi];
-      var volNum = vi + 1;
-      var pctBase = 20 + Math.floor(70 * vi / totalVol);
-      var pctEnd = 20 + Math.floor(70 * (vi + 1) / totalVol);
-      setProgress(pctBase, '📚 Step 2/2 — ' + volNum + '권 "' + vol.volTitle + '" 생성 중... (' + volNum + '/' + totalVol + ')');
-
-      var chList = vol.chapters.map(function(c, ci) {
-        return '{"t":"' + (ci+1) + '장","s":"' + c + '","body":"...","qt":"...","sm":["...","...","..."],"q":"...","ct":"...","lt":"...","fe":"이모지2개","sk":"키워드","w":[{"w":"단어","d":"뜻","e":"예문"}]}';
-      }).join(',\n');
-
-      var volPrompt = '책 "' + struct.title + '"(' + struct.author + ') ' + volNum + '권 "' + vol.volTitle + '". JSON만 출력. 원작 내용 기반.\n'
-        + 'body는 5~7줄: 무슨 일이 일어나는지, 인물 감정변화, 왜 중요한 장면인지. 초등 고학년이 이해하게.\n'
-        + 'sm은 요약 3개. q는 사유질문(왜?어떻게?). ct는 비판적사고. lt는 논리추론(만약~라면?).\n'
-        + '{"vol":' + volNum + ',"volTitle":"' + vol.volTitle + '","emotions":[' + vol.chapters.map(function(c,ci){return '{"ch":"'+(ci+1)+'장","label":"감정","color":"#hex","h":50}';}).join(',') + '],"chapters":[\n' + chList + '\n]}';
-
-      var volData = await _aiCall(volPrompt, 1);
-      if (!volData.chapters) throw new Error(volNum + '권 생성 실패');
-
-      // 권별 book 객체 생성
-      var volTitle = totalVol > 1 ? struct.title + ' ' + volNum + '권' : struct.title;
-      var book = {
-        id: BOOKS.length + allBooks.length,
-        title: volTitle,
-        author: struct.author,
-        emo: struct.emoji || '📚',
-        genre: struct.genre || '',
-        vol: volNum,
-        totalVol: totalVol,
-        volTitle: vol.volTitle,
-        coreLines: struct.coreLines || [],
-        bigQ: struct.bigQ || '',
-        cast: struct.cast || [],
-        emotions: volData.emotions || [],
-        chapters: volData.chapters.map(function(ch, ci) {
-          return _normalizeChapter(ch, ci, volData.chapters.length);
-        })
-      };
-      allBooks.push(book);
-      setProgress(pctEnd, '✅ ' + volNum + '권 완성! (' + book.chapters.length + '챕터)');
+    if (!volOverride) {
+      document.getElementById('aiBookTitle').value = '';
+      document.getElementById('aiBookAuthor').value = '';
     }
-
-    // ── 모든 권 등록 ──
-    allBooks.forEach(function(book) {
-      book.id = BOOKS.length;
-      BOOKS.push(book);
-      generateBookMusic(book.id, book.genre);
-    });
-    try { _set('bh5_custom_books', BOOKS.filter(function(b){return !b._builtin;})); } catch(e) {}
-
-    var totalCh = allBooks.reduce(function(a,b){return a+b.chapters.length;},0);
-    console.log('✅ 도서 추가 완료:', struct.title, totalVol + '권 / 총', BOOKS.length, '권');
-    document.getElementById('aiBookTitle').value = '';
-    document.getElementById('aiBookAuthor').value = '';
     renderMyCustomBooks();
 
     // ── 완료 팝업 ──
+    var nextVolHtml = '';
+    if (totalVol > 1 && curVol < totalVol) {
+      nextVolHtml = '<button onclick="generateBookWithAI({title:\'' + book.title.replace(/ \d+권$/, '').replace(/'/g,"\\'") + '\',author:\'' + (book.author||'').replace(/'/g,"\\'") + '\',vol:' + (curVol+1) + '})" style="margin-top:14px;padding:10px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:var(--mono);font-size:12px;cursor:pointer;letter-spacing:1px">[ ' + (curVol+1) + '권 이어서 생성 → ]</button>';
+    }
+
     statusEl.innerHTML = '<div style="background:rgba(255,255,255,0.95);border:1px solid rgba(61,8,20,0.15);border-radius:14px;padding:24px 20px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.12);animation:popIn 0.3s ease">'
       + '<div style="font-size:36px;margin-bottom:10px">🎉</div>'
-      + '<div style="font-family:var(--font);font-size:16px;font-weight:700;color:var(--accent);margin-bottom:6px">"' + struct.title + '" 완성!</div>'
-      + '<div style="font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:1px">' + totalVol + '권 · ' + totalCh + '챕터</div>'
-      + '<div style="margin-top:12px;font-family:var(--font);font-size:11px;color:#8A8078">3초 후 홈으로 이동합니다...</div>'
+      + '<div style="font-family:var(--font);font-size:16px;font-weight:700;color:var(--accent);margin-bottom:6px">"' + book.title + '" 완성!</div>'
+      + '<div style="font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:1px">' + book.chapters.length + '챕터' + (totalVol > 1 ? ' · 전체 ' + totalVol + '권 중 ' + curVol + '권' : '') + '</div>'
+      + nextVolHtml
+      + '<div style="margin-top:12px;font-family:var(--font);font-size:11px;color:#8A8078">' + (nextVolHtml ? '다음 권을 생성하거나, ' : '') + '3초 후 홈으로 이동</div>'
       + '</div>';
 
-    setTimeout(function() {
-      statusEl.style.transition = 'opacity 0.5s';
-      statusEl.style.opacity = '0';
+    if (!nextVolHtml) {
       setTimeout(function() {
-        statusEl.innerHTML = '';
-        statusEl.style.opacity = '1';
-        statusEl.style.transition = '';
-        navTo('home'); renderShelf();
-      }, 500);
-    }, 3000);
+        statusEl.style.transition = 'opacity 0.5s';
+        statusEl.style.opacity = '0';
+        setTimeout(function() {
+          statusEl.innerHTML = ''; statusEl.style.opacity = '1'; statusEl.style.transition = '';
+          navTo('home'); renderShelf();
+        }, 500);
+      }, 3000);
+    } else {
+      setTimeout(function() {
+        if (statusEl.innerHTML.includes('🎉')) {
+          statusEl.style.transition = 'opacity 0.5s'; statusEl.style.opacity = '0';
+          setTimeout(function() {
+            statusEl.innerHTML = ''; statusEl.style.opacity = '1'; statusEl.style.transition = '';
+            navTo('home'); renderShelf();
+          }, 500);
+        }
+      }, 8000);
+    }
 
   } catch(e) {
+    clearInterval(pTimer);
     console.error('AI 생성 오류:', e);
     var errMsg = e.message;
-    if (e.name === 'AbortError') errMsg = '서버 응답 시간 초과. 재시도도 실패했어요.';
-    else if (errMsg.includes('JSON')) errMsg = 'AI 응답 해석 실패 — 아래에 직접 JSON을 붙여넣어 보세요.';
+    if (e.name === 'AbortError') errMsg = '응답 시간 초과. 다시 시도해주세요.';
+    else if (errMsg.includes('JSON')) errMsg = 'AI 응답 해석 실패.';
     else if (errMsg.includes('504')) errMsg = '서버가 바쁩니다. 잠시 후 다시 시도해주세요.';
     statusEl.innerHTML = '❌ ' + errMsg + '<br><span style="font-size:11px;color:var(--dim)">[ AI로 책 생성하기 ] 버튼을 다시 눌러보세요.</span>';
     document.getElementById('aiJsonInput').style.display = 'block';
@@ -3922,31 +3887,7 @@ function applyBookJSON() {
     if (jsonStart >= 0 && jsonEnd > jsonStart) clean = clean.substring(jsonStart, jsonEnd + 1);
     var book = JSON.parse(clean);
     if (!book.title || !book.chapters) throw new Error('title 또는 chapters가 없어요');
-    var newId = BOOKS.length;
-    book.id = newId;
-    book.emo = book.emoji || book.emo || '📚';
-    book.coreLines = book.coreLines || [];
-    book.emotions = book.emotions || [];
-    book.cast = book.cast || [];
-    book.bigQ = book.bigQ || '';
-    book.chapters = book.chapters.map(function(ch, i) {
-      ch.t = ch.t || ((i+1) + '장');
-      ch.s = ch.s || ch.t;
-      ch.body = ch.body || '';
-      ch.qt = ch.qt || '';
-      ch.q = ch.q || '';
-      ch.ct = ch.ct || '';
-      ch.lt = ch.lt || '';
-      ch.fe = ch.fe || '📖';
-      ch.sm = ch.sm || [];
-      ch.w = ch.w || [];
-      ch.sk = ch.sk || 'book';
-      if (i === book.chapters.length - 1) ch.isLast = true;
-      return ch;
-    });
-    BOOKS.push(book);
-    generateBookMusic(newId, book.genre || '');
-    try { _set('bh5_custom_books', BOOKS.filter(function(b){return !b._builtin;})); } catch(e) {}
+    _registerBook(book);
     status.textContent = '✅ 완성!';
     document.getElementById('aiBookTitle').value = '';
     document.getElementById('aiBookAuthor').value = '';
