@@ -18,6 +18,7 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSIzNiIgZmlsbD0iI0U3RjlBOSIvPjx0ZXh0IHg9IjIyIiB5PSIxMTUiIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLCBzZXJpZiIgZm9udC1zaXplPSI3MiIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iIzNkMDgxNCI+QjwvdGV4dD48dGV4dCB4PSIxMiIgeT0iMTY1IiBmb250LWZhbWlseT0iR2VvcmdpYSwgc2VyaWYiIGZvbnQtc2l6ZT0iMjIiIGZpbGw9IiMzZDA4MTQiIG9wYWNpdHk9IjAuNyI+Qm9va0hpdGNoPC90ZXh0Pjwvc3ZnPg==">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Space+Grotesk:wght@700;800&family=Caveat:wght@700&family=Anton&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>@keyframes popIn{0%{transform:scale(0.8);opacity:0}100%{transform:scale(1);opacity:1}}</style>
 <!-- deploy: 1774845299 -->
 </head>
 <body>
@@ -3852,13 +3853,30 @@ async function generateBookWithAI() {
     });
     try { _set('bh5_custom_books', BOOKS.filter(function(b){return !b._builtin;})); } catch(e) {}
 
-    setProgress(100, '🎉 "' + struct.title + '" 완성! (' + totalVol + '권 · ' + allBooks.reduce(function(a,b){return a+b.chapters.length;},0) + '챕터)');
+    var totalCh = allBooks.reduce(function(a,b){return a+b.chapters.length;},0);
     console.log('✅ 도서 추가 완료:', struct.title, totalVol + '권 / 총', BOOKS.length, '권');
     document.getElementById('aiBookTitle').value = '';
     document.getElementById('aiBookAuthor').value = '';
-    showToast('📚 ' + struct.title + ' ' + totalVol + '권 추가!');
     renderMyCustomBooks();
-    setTimeout(function() { navTo('home'); renderShelf(); }, 1500);
+
+    // ── 완료 팝업 ──
+    statusEl.innerHTML = '<div style="background:rgba(255,255,255,0.95);border:1px solid rgba(61,8,20,0.15);border-radius:14px;padding:24px 20px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.12);animation:popIn 0.3s ease">'
+      + '<div style="font-size:36px;margin-bottom:10px">🎉</div>'
+      + '<div style="font-family:var(--font);font-size:16px;font-weight:700;color:var(--accent);margin-bottom:6px">"' + struct.title + '" 완성!</div>'
+      + '<div style="font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:1px">' + totalVol + '권 · ' + totalCh + '챕터</div>'
+      + '<div style="margin-top:12px;font-family:var(--font);font-size:11px;color:#8A8078">3초 후 홈으로 이동합니다...</div>'
+      + '</div>';
+
+    setTimeout(function() {
+      statusEl.style.transition = 'opacity 0.5s';
+      statusEl.style.opacity = '0';
+      setTimeout(function() {
+        statusEl.innerHTML = '';
+        statusEl.style.opacity = '1';
+        statusEl.style.transition = '';
+        navTo('home'); renderShelf();
+      }, 500);
+    }, 3000);
 
   } catch(e) {
     console.error('AI 생성 오류:', e);
