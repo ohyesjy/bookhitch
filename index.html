@@ -3766,7 +3766,7 @@ async function generateBookWithAI() {
 
     BOOKS.push(book);
     var musicPreset = generateBookMusic(newId, book.genre);
-    try { _set('bh5_custom_books', BOOKS.slice(11)); } catch(e) {}
+    try { _set('bh5_custom_books', BOOKS.filter(function(b){return !b._builtin && b.id >= 11;})); } catch(e) {}
 
     clearInterval(pTimer);
     if (bar) bar.style.width = '100%';
@@ -3814,7 +3814,7 @@ function applyBookJSON() {
     });
     BOOKS.push(book);
     generateBookMusic(newId, book.genre || '');
-    try { _set('bh5_custom_books', BOOKS.slice(11)); } catch(e) {}
+    try { _set('bh5_custom_books', BOOKS.filter(function(b){return !b._builtin && b.id >= 11;})); } catch(e) {}
     status.textContent = '✅ 완성!';
     document.getElementById('aiBookTitle').value = '';
     document.getElementById('aiBookAuthor').value = '';
