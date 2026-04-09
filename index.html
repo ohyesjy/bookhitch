@@ -135,7 +135,7 @@
       color: #2A0510; margin-bottom: 8px;
       outline: none;
     ">
-    <input type="text" id="aiBookAuthor" placeholder="저자명..." style="
+    <input type="text" id="aiBookAuthor" placeholder="저자명..." onkeydown="if(event.key==='Enter'){event.preventDefault();generateBookWithAI();}" style="
       width: 100%; box-sizing: border-box;
       background: rgba(255,255,255,0.6);
       border: 1px solid rgba(61,8,20,0.2);
@@ -3903,9 +3903,10 @@ function applyBookJSON() {
 }
 
 function renderSrch(q) {
-  const f = q ? SRCH.filter(b => b.t.includes(q) || b.a.includes(q)) : SRCH;
-  document.getElementById('srchRes').innerHTML = f.map((b, i) =>
-    `<div class="res-item"><span class="res-idx">[${i}]</span><div class="res-emo">${b.e}</div><div style="flex:1"><div class="res-ttl">${b.t}</div><div class="res-auth">${b.a}</div><div class="res-genre">${b.g}</div></div><button class="res-add" onclick="showToast('ADDED')">ADD</button></div>`
+  if (!q) { document.getElementById('srchRes').innerHTML = ''; renderMyCustomBooks(); return; }
+  const f = SRCH.filter(b => b.t.includes(q) || b.a.includes(q));
+  document.getElementById('srchRes').innerHTML = f.map((b) =>
+    `<div class="res-item"><div class="res-emo">${b.e}</div><div style="flex:1"><div class="res-ttl">${b.t}</div><div class="res-auth">${b.a}</div><div class="res-genre">${b.g}</div></div><button class="res-add" onclick="showToast('ADDED')">ADD</button></div>`
   ).join('');
   renderMyCustomBooks();
 }
@@ -4002,7 +4003,7 @@ window.addEventListener('load', function() {
     }
   } catch(e) { console.warn('Custom books load error', e); }
 
-  try { renderSrch(''); }    catch(e) { console.warn('renderSrch error', e); }
+  try { renderMyCustomBooks(); } catch(e) { console.warn('renderMyCustomBooks error', e); }
   try { renderShelf(); }     catch(e) { console.warn('renderShelf error', e); }
   try { renderToday(); }     catch(e) { console.warn('renderToday error', e); }
   try { renderChTabs(0); }   catch(e) { console.warn('renderChTabs error', e); }
