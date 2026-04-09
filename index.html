@@ -3688,7 +3688,7 @@ async function generateBookWithAI() {
   var prompt = '책 "' + title + '"(' + (author || '미상') + '). JSON만(```없이):\n{"title":"제목","author":"저자","emoji":"이모지1개","genre":"장르","coreLines":["핵심문장1","핵심문장2","핵심문장3"],"chapters":[{"t":"1장","s":"챕터제목","body":"5줄 이상 핵심내용 구체적 장면 포함","qt":"핵심인용구","sm":["요약1","요약2"],"q":"사고질문","ct":"비판질문","lt":"추론질문","fe":"이모지2개","sk":"키워드","w":[{"w":"단어","d":"뜻","e":"예문"}]}]}\n챕터는 5~6개. body는 구체적 장면과 인물 포함. 실제 읽은 느낌이 나게.';
 
   try {
-    var res = await fetch('/.netlify/functions/claude', {
+    var res = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: prompt })
