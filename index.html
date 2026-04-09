@@ -3786,7 +3786,7 @@ async function generateBookWithAI(volOverride) {
   var authorStr = author || '미상';
   var volLabel = volNum > 1 ? ' ('+volNum+'권 생성 중)' : '';
 
-  statusEl.innerHTML = '<div style="margin-bottom:8px">📚 AI가 분석 중...' + volLabel + '</div>'
+  statusEl.innerHTML = '<div style="margin-bottom:8px">📚 AI가 분석 중... (약 30초)' + volLabel + '</div>'
     + '<div style="width:100%;height:6px;background:rgba(0,0,0,0.16);border-radius:3px;overflow:hidden">'
     + '<div id="aiProg" style="width:5%;height:100%;background:linear-gradient(90deg,#3d0814,#E7F9A9);border-radius:3px;transition:width 0.5s"></div></div>';
   var pTimer = setInterval(function() {
@@ -3803,7 +3803,7 @@ async function generateBookWithAI(volOverride) {
     + '{"title":"","author":"","emoji":"","genre":"","vol":'+volNum+',"totalVol":1,"volTitle":"부제","coreLines":["","",""],"bigQ":"","cast":[{"name":"","role":"","emo":"","desc":""}],"emotions":[{"ch":"1장","label":"","color":"#hex","h":50},{"ch":"2장","label":"","color":"#hex","h":60}],"chapters":[{"t":"1장","s":"","body":"4~5줄","qt":"","sm":["","",""],"q":"사유질문","ct":"비판적사고","lt":"논리추론","fe":"이모지2개","sk":"키워드","w":[{"w":"","d":"","e":""}]}]}';
 
   try {
-    var book = await _aiCall(prompt, 'sonnet');
+    var book = await _aiCall(prompt, 'haiku');
     clearInterval(pTimer);
 
     if (!book.chapters || book.chapters.length === 0) throw new Error('AI가 챕터를 생성하지 못했어요');
