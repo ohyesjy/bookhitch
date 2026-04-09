@@ -806,7 +806,13 @@ function getSayuSketch(bookIdx, chIdx) {
         '권력':'key','자연':'tree','도시':'house','바닷가':'sea'
       };
       var mappedSk = skMap[ch.sk] || ch.sk;
-      var svg = (skLib[mappedSk] || skLib['book']).replace(/C/g, c);
+      // 같은 키워드라도 챕터마다 다른 그림 보이게 회전
+      var skKeys = Object.keys(skLib);
+      var baseIdx = skKeys.indexOf(mappedSk);
+      if (baseIdx === -1) baseIdx = 0;
+      var rotatedIdx = (baseIdx + chIdx) % skKeys.length;
+      var selectedKey = skKeys[rotatedIdx];
+      var svg = skLib[selectedKey].replace(/C/g, c);
       var label = (ch.s || '').length > 10 ? (ch.s || '').slice(0,10) + '…' : (ch.s || '');
       return '<div class="sayu-sketch"><svg width="220" height="115" viewBox="0 0 220 115" fill="none">' + w + '<g filter="url(#wob)">' + svg + '<text x="30" y="108" font-family="serif" font-size="8" fill="' + c + '" opacity="0.5">' + label + '</text></g></svg></div>';
     }
