@@ -3721,6 +3721,7 @@ function generateBookMusic(bookId, genre) {
   return preset;
 }
 
+var _aiRetryCount = 0;
 async function generateBookWithAI() {
   var title = document.getElementById('aiBookTitle').value.trim();
   var author = document.getElementById('aiBookAuthor').value.trim();
@@ -3730,7 +3731,7 @@ async function generateBookWithAI() {
   if (!title) { showToast('책 제목을 입력해주세요'); return; }
 
   if (genBtn) { genBtn.disabled = true; genBtn.style.opacity = '0.5'; }
-  status.innerHTML = '<div style="margin-bottom:8px">📚 AI가 분석 중... (15~25초)</div><div style="width:100%;height:6px;background:rgba(0,0,0,0.16);border-radius:3px;overflow:hidden"><div id="aiProg" style="width:5%;height:100%;background:linear-gradient(90deg,#3d0814,#E7F9A9);border-radius:3px;transition:width 0.5s"></div></div>';
+  status.innerHTML = '<div style="margin-bottom:8px">📚 AI가 분석 중... (15~30초)</div><div style="width:100%;height:6px;background:rgba(0,0,0,0.16);border-radius:3px;overflow:hidden"><div id="aiProg" style="width:5%;height:100%;background:linear-gradient(90deg,#3d0814,#E7F9A9);border-radius:3px;transition:width 0.5s"></div></div>';
 
   var pTimer = setInterval(function() {
     var bar = document.getElementById('aiProg');
@@ -3740,11 +3741,17 @@ async function generateBookWithAI() {
   var prompt = '책 "' + title + '"(' + (author || '미상') + '). 반드시 JSON만 출력(```없이). 정확한 원작 내용 기반. 모르면 생성하지 마.\n{"title":"제목","author":"저자","emoji":"이모지1개","genre":"장르","coreLines":["이 책의 핵심문장1","핵심문장2","핵심문장3"],"bigQ":"이 책이 내 삶에 묻는 깊은 질문 1개","cast":[{"name":"이름","role":"역할","emo":"이모지1개","desc":"한줄설명"}],"emotions":[{"ch":"1장","label":"감정단어","color":"#hex6자리","h":50},{"ch":"2장","label":"감정","color":"#hex","h":60},{"ch":"3장","label":"감정","color":"#hex","h":70}],"chapters":[{"t":"1장","s":"챕터제목","body":"초등생이 이해하는 3줄 핵심장면","qt":"핵심인용구","sm":["요약1","요약2"],"q":"사유질문(왜?어떻게?)","ct":"비판적사고질문(반대시각)","lt":"논리적추론질문(만약~라면?)","fe":"이모지2개","sk":"한국어키워드1개(고독,도전,성장,사랑,모험,자유,용기,슬픔,희망,운명,진실,자연 중)","w":[{"w":"어려운단어","d":"뜻","e":"예문"}]}]}\n챕터 3개. body는 간결하게 3줄. h는 감정강도(30~80). 전체 3500토큰 이내.';
 
   try {
+    // 55초 타임아웃 설정
+    var controller = new AbortController();
+    var timeout = setTimeout(function() { controller.abort(); }, 55000);
+
     var res = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: prompt })
+      body: JSON.stringify({ prompt: prompt }),
+      signal: controller.signal
     });
+    clearTimeout(timeout);
 
     var bar = document.getElementById('aiProg');
     if (bar) bar.style.width = '85%';
@@ -3752,11 +3759,12 @@ async function generateBookWithAI() {
     if (!res.ok) {
       var errText = ''; try { errText = await res.text(); } catch(e2) {}
       if (res.status === 504) { throw new Error('RETRY_504'); }
-      throw new Error('서버 오류: ' + res.status);
+      throw new Error('서버 오류: ' + res.status + (errText ? ' — ' + errText.slice(0,100) : ''));
     }
 
     var data = await res.json();
-    if (!data.content || !data.content[0]) throw new Error('AI 응답이 비어있어요');
+    console.log('AI 응답 수신:', JSON.stringify(data).slice(0,200));
+    if (!data.content || !data.content[0]) throw new Error('AI 응답이 비어있어요. 응답: ' + JSON.stringify(data).slice(0,200));
 
     if (bar) bar.style.width = '92%';
 
@@ -3806,8 +3814,10 @@ async function generateBookWithAI() {
     });
 
     BOOKS.push(book);
+    _aiRetryCount = 0;
     var musicPreset = generateBookMusic(newId, book.genre);
     try { _set('bh5_custom_books', BOOKS.filter(function(b){return !b._builtin;})); } catch(e) {}
+    console.log('✅ 도서 추가 완료:', book.title, '/ 총', BOOKS.length, '권');
 
     clearInterval(pTimer);
     if (bar) bar.style.width = '100%';
@@ -3821,9 +3831,21 @@ async function generateBookWithAI() {
   } catch(e) {
     console.error(e);
     clearInterval(pTimer);
-    if (e.message === 'RETRY_504') {
-      status.innerHTML = '⏳ 서버 준비 중... 3초 후 자동 재시도합니다.';
+    if (e.message === 'RETRY_504' && _aiRetryCount < 2) {
+      _aiRetryCount++;
+      status.innerHTML = '⏳ 서버 준비 중... 3초 후 자동 재시도 (' + _aiRetryCount + '/2)';
       setTimeout(function() { generateBookWithAI(); }, 3000);
+      return;
+    }
+    if (e.message === 'RETRY_504') {
+      status.innerHTML = '❌ 서버 응답 시간 초과. 잠시 후 다시 시도해주세요.';
+      _aiRetryCount = 0;
+      if (genBtn) { genBtn.disabled = false; genBtn.style.opacity = '1'; }
+      return;
+    }
+    if (e.name === 'AbortError') {
+      status.innerHTML = '❌ 요청 시간 초과 (55초). 다시 시도해주세요.';
+      if (genBtn) { genBtn.disabled = false; genBtn.style.opacity = '1'; }
       return;
     }
     var errMsg = e.message;
