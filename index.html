@@ -2669,7 +2669,8 @@ function renderShelf() {
     var book = item.book;
     var bi = item.idx;
     var prog = getBookProgress(bi);
-    var delBtn = !book._builtin ? '<div onclick="event.stopPropagation();deleteCustomBook(' + bi + ')" style="text-align:center;margin-top:8px;padding:6px 0;color:#C04040;font-size:12px;font-family:var(--mono);cursor:pointer;letter-spacing:1px">✕ 삭제</div>' : '';
+    var delFnCard = book._builtin ? 'hideBuiltinBook(' + bi + ')' : 'deleteCustomBook(' + bi + ')';
+    var delBtn = '<div onclick="event.stopPropagation();' + delFnCard + '" style="text-align:center;margin-top:8px;padding:6px 0;color:#C04040;font-size:12px;font-family:var(--mono);cursor:pointer;letter-spacing:1px">✕ 삭제</div>';
 
     // 카드
     out += '<div style="display:flex;align-items:center;gap:6px">';
@@ -2852,10 +2853,8 @@ function _renderShelfList() {
     if (filter !== '전체' && filter !== con) return;
     var d = document.createElement('div');
     d.style.cssText = 'padding:14px;border-bottom:0.5px solid rgba(0,0,0,0.1);cursor:pointer;';
-    var delHtml = '';
-    if (!b._builtin) {
-      delHtml = '<span onclick="event.stopPropagation();deleteCustomBook('+i+')" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:rgba(192,64,64,0.1);color:#C04040;font-size:16px;font-weight:bold;cursor:pointer;flex-shrink:0;transition:background 0.2s" onmouseenter="this.style.background=\'rgba(192,64,64,0.25)\'" onmouseleave="this.style.background=\'rgba(192,64,64,0.1)\'">✕</span>';
-    }
+    var delFn = b._builtin ? 'hideBuiltinBook('+i+')' : 'deleteCustomBook('+i+')';
+    var delHtml = '<span onclick="event.stopPropagation();'+delFn+'" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:rgba(192,64,64,0.1);color:#C04040;font-size:16px;font-weight:bold;cursor:pointer;flex-shrink:0;transition:background 0.2s" onmouseenter="this.style.background=\'rgba(192,64,64,0.25)\'" onmouseleave="this.style.background=\'rgba(192,64,64,0.1)\'">✕</span>';
     d.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
       +'<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;color:var(--accent);">'+b.emo+' '+b.title+'</div>'
       +'<div style="font-size:11px;color:var(--dim);margin-top:2px;">'+b.author+'</div></div>'
@@ -3916,6 +3915,26 @@ function renderMyCustomBooks() {
   });
   el.innerHTML = html;
 }
+function hideBuiltinBook(idx) {
+  var book = BOOKS[idx];
+  if (!book) return;
+  if (!confirm('"' + book.title + '" 을 목록에서 숨길까요?\n(설정에서 다시 복원 가능)')) return;
+  var hidden = _get('bh5_hidden_books', []);
+  var key = book.title + '::' + book.author;
+  if (hidden.indexOf(key) === -1) hidden.push(key);
+  _set('bh5_hidden_books', hidden);
+  BOOKS.splice(idx, 1);
+  BOOKS.forEach(function(b, i) { b.id = i; });
+  renderShelf();
+  renderToday();
+  _renderShelfList();
+  renderMyCustomBooks();
+  showToast('"' + book.title + '" 숨김 처리됨');
+}
+function unhideAllBooks() {
+  _set('bh5_hidden_books', []);
+  showToast('숨긴 도서가 복원됩니다. 새로고침 해주세요.');
+}
 function deleteCustomBook(idx) {
   var book = BOOKS[idx];
   if (!book) return;
@@ -3935,6 +3954,18 @@ function deleteCustomBook(idx) {
 function filterBooks(v) { renderSrch(v); }
 
 window.addEventListener('load', function() {
+  // 숨긴 빌트인 도서 제외
+  try {
+    var hidden = _get('bh5_hidden_books', []);
+    if (hidden && hidden.length > 0) {
+      for (var hi = BOOKS.length - 1; hi >= 0; hi--) {
+        var hkey = BOOKS[hi].title + '::' + BOOKS[hi].author;
+        if (hidden.indexOf(hkey) !== -1) BOOKS.splice(hi, 1);
+      }
+      BOOKS.forEach(function(b, i) { b.id = i; });
+      console.log('Hidden ' + hidden.length + ' builtin books');
+    }
+  } catch(e) { console.warn('Hidden books filter error', e); }
   // 커스텀 책 로드 (AI로 추가한 책들)
   try {
     var customBooks = _get('bh5_custom_books', []);
