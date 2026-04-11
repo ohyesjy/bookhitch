@@ -1,5 +1,11 @@
 // BookHitch - Music & Audio Module
 
+// 오디오 전역 상태
+var audioCtx = null;
+var musicNodes = [];
+var musicOn = false;
+var musicScheduler = null;
+
 function n(note) {
   var notes = {
     C2:65.4,D2:73.4,E2:82.4,F2:87.3,G2:98,A2:110,B2:123.5,
